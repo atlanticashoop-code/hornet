@@ -4,92 +4,370 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rifa da Moto - Sorteio Oficial</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #2563eb;
+            --accent-green: #10b981;
+            --accent-green-dark: #059669;
+            --accent-gold: #f59e0b;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-family);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-top: 65px;
+            padding-bottom: 90px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--card-border);
+            z-index: 100;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 8px; }
+        .logo-icon { font-size: 1.4rem; }
+        .logo-title { font-weight: 800; font-size: 1.1rem; color: #fff; }
+
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .app-body {
+            width: 100%;
+            max-width: 480px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-card { padding: 12px; }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .hero-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(16, 185, 129, 0.9);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .hero-info { padding: 12px 6px 4px 6px; }
+        .hero-info h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+        .hero-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; }
+
+        .price-chip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(37, 99, 235, 0.15);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+        }
+
+        .chip-label { font-size: 0.85rem; color: var(--text-muted); }
+        .chip-value { font-size: 1.1rem; font-weight: 800; color: #60a5fa; }
+
+        .section-header { margin-bottom: 14px; }
+        .section-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .sub-header { font-size: 0.8rem; color: var(--text-muted); }
+
+        .cotas-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .cota-tile {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .cota-tile.active {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .tile-qty { font-size: 1.3rem; font-weight: 800; color: var(--text-main); }
+        .tile-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+        .tile-price { font-size: 0.85rem; font-weight: 700; color: var(--accent-green); }
+
+        .popular-badge {
+            position: absolute;
+            top: -9px;
+            background: var(--accent-gold);
+            color: #000;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .custom-qty-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .qty-stepper {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .step-btn {
+            width: 50px;
+            height: 44px;
+            background: var(--card-bg);
+            border: none;
+            color: var(--text-main);
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .qty-stepper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            text-align: center;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .checkout-form { display: flex; flex-direction: column; gap: 14px; }
+        .input-field { display: flex; flex-direction: column; gap: 6px; }
+        .input-field label { font-size: 0.82rem; color: var(--text-muted); }
+
+        .input-with-icon input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px 12px 12px 14px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .summary-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .summary-row { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--text-muted); }
+        .total-row { font-size: 1rem; color: var(--text-main); padding-top: 6px; border-top: 1px dashed var(--card-border); }
+        .price-green { color: var(--accent-green); font-size: 1.2rem; }
+
+        .btn-checkout {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-green-dark) 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .bottom-dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 75px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 90;
+        }
+
+        .dock-price { font-size: 1.25rem; font-weight: 800; color: var(--accent-green); }
+        .dock-btn {
+            background: var(--accent-green);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px 20px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .drawer-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 200;
+        }
+        .drawer-overlay.active { display: block; }
+
+        .drawer-menu {
+            position: fixed; top: 0; right: -300px; width: 300px; height: 100%;
+            background: var(--card-bg); z-index: 210; transition: right 0.3s ease; padding: 20px;
+        }
+        .drawer-menu.active { right: 0; }
+
+        .drawer-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            background: rgba(255,255,255,0.03); border-radius: var(--radius-md);
+            text-decoration: none; color: #fff; margin-bottom: 10px;
+        }
+
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; align-items: flex-end; justify-content: center; z-index: 300;
+        }
+        .modal-backdrop.active { display: flex; }
+
+        .modal-sheet {
+            background: var(--card-bg); width: 100%; max-width: 480px;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            padding: 24px 20px; position: relative;
+        }
+        .sheet-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 1.8rem; }
+    </style>
 </head>
 <body>
 
-    <!-- Header Fixo Topo -->
     <header class="app-header">
         <div class="logo-area">
             <span class="logo-icon">🏍️</span>
             <span class="logo-title">Rifa da Moto</span>
         </div>
-        <button class="icon-btn" id="openMenu" aria-label="Abrir Menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
+        <button class="icon-btn" id="openMenu">☰</button>
     </header>
 
-    <!-- Menu Drawer Deslizante Lateral -->
     <div class="drawer-overlay" id="overlay"></div>
     <aside class="drawer-menu" id="sidebar">
-        <div class="drawer-header">
-            <h3>Menu do Participante</h3>
-            <button class="close-btn" id="closeMenu">&times;</button>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <h3>Menu do Site</h3>
+            <button id="closeMenu" style="background:none; border:none; color:#fff; font-size:1.5rem;">✕</button>
         </div>
-        <div class="drawer-content">
-            <a href="#" class="drawer-item" id="menuMeusBilhetes">
-                <span class="item-icon">🎟️</span>
-                <div class="item-text">
-                    <strong>Meus Bilhetes</strong>
-                    <small>Consulte suas cotas compradas</small>
-                </div>
-            </a>
-            <a href="#" class="drawer-item" id="menuTermos">
-                <span class="item-icon">📜</span>
-                <div class="item-text">
-                    <strong>Termos de Uso</strong>
-                    <small>Regras e prazos do sorteio</small>
-                </div>
-            </a>
-            <a href="#" class="drawer-item" id="menuSuporte">
-                <span class="item-icon">💬</span>
-                <div class="item-text">
-                    <strong>Suporte WhatsApp</strong>
-                    <small>Fale com o organizador</small>
-                </div>
-            </a>
-        </div>
+        <a href="#" class="drawer-item" id="menuMeusBilhetes">🎟️ Meus Bilhetes</a>
+        <a href="#" class="drawer-item" id="menuTermos">📜 Termos de Uso</a>
+        <a href="#" class="drawer-item" id="menuSuporte">💬 Suporte WhatsApp</a>
     </aside>
 
-    <!-- Conteúdo Principal Aplicativo -->
     <main class="app-body">
 
-        <!-- Banner Galeria Foto -->
         <section class="card hero-card">
             <div class="image-wrapper">
                 <img src="https://i.postimg.cc/mD82yC4S/moto.jpg" alt="Foto da Moto" class="hero-img">
                 <span class="status-badge">🔥 SORTEIO ATIVO</span>
             </div>
             <div class="hero-info">
-                <h1>Moto Zero Km / Preparada</h1>
-                <p class="hero-desc">Participe agora mesmo! Apenas <strong>R$ 2,99</strong> por cota no PIX com confirmação na hora.</p>
-                
+                <h1>Sorteio Moto Oficial</h1>
+                <p class="hero-desc">Participe agora mesmo! Apenas <strong>R$ 2,99</strong> por cota com confirmação rápida via PIX.</p>
                 <div class="price-chip">
-                    <span class="chip-label">Valor por cota</span>
+                    <span class="chip-label">Valor da cota</span>
                     <span class="chip-value">R$ 2,99</span>
                 </div>
             </div>
         </section>
 
-        <!-- Seleção Ágil de Cotas (Mobile Touch Cards) -->
-        <section class="card cotas-card">
+        <section class="card">
             <div class="section-header">
-                <h2>⚡ Escolha suas Cotas</h2>
-                <span class="sub-header">Selecione uma opção rápida</span>
+                <h2>⚡ Selecione suas Cotas</h2>
             </div>
 
-            <!-- Grid de Botões Estilo App -->
             <div class="cotas-grid">
                 <button class="cota-tile" data-qtd="5">
                     <span class="tile-qty">+5</span>
                     <span class="tile-label">Cotas</span>
                     <span class="tile-price">R$ 14,95</span>
                 </button>
-                <button class="cota-tile popular" data-qtd="10">
-                    <span class="popular-badge">MAIS VENDIDO</span>
+                <button class="cota-tile active" data-qtd="10">
+                    <span class="popular-badge">MAIS POPULAR</span>
                     <span class="tile-qty">+10</span>
                     <span class="tile-label">Cotas</span>
                     <span class="tile-price">R$ 29,90</span>
@@ -99,145 +377,118 @@
                     <span class="tile-label">Cotas</span>
                     <span class="tile-price">R$ 149,50</span>
                 </button>
-                <button class="cota-tile highlight" data-qtd="100">
+                <button class="cota-tile" data-qtd="100">
                     <span class="tile-qty">+100</span>
                     <span class="tile-label">Cotas</span>
                     <span class="tile-price">R$ 299,00</span>
                 </button>
             </div>
 
-            <!-- Seletor de Quantidade Customizada Touch -->
             <div class="custom-qty-wrapper">
-                <span class="custom-title">Ou informe outra quantidade:</span>
+                <span style="font-size:0.82rem; color:var(--text-muted)">Quantidade personalizada:</span>
                 <div class="qty-stepper">
                     <button class="step-btn" id="btnMinus">-</button>
-                    <input type="number" id="qtdManual" value="1" min="1" inputmode="numeric">
+                    <input type="number" id="qtdManual" value="10" min="1">
                     <button class="step-btn" id="btnPlus">+</button>
                 </div>
             </div>
         </section>
 
-        <!-- Formulário Rápido de Compra -->
-        <section class="card checkout-card" id="secaoCheckout">
+        <section class="card" id="secaoCheckout">
             <div class="section-header">
-                <h2>👤 Identificação para Reserva</h2>
-                <span class="sub-header">Seus bilhetes ficarão salvos no seu CPF</span>
+                <h2>👤 Dados para Reserva</h2>
             </div>
-
             <form id="formCheckout" class="checkout-form">
                 <div class="input-field">
-                    <label for="cpfInput">CPF do Comprador</label>
+                    <label>CPF para guardar seus bilhetes</label>
                     <div class="input-with-icon">
-                        <span class="field-icon">🪪</span>
-                        <input type="text" id="cpfInput" placeholder="000.000.000-00" required maxlength="14" inputmode="numeric">
+                        <input type="text" id="cpfInput" placeholder="000.000.000-00" required maxlength="14">
                     </div>
                 </div>
 
-                <!-- Resumo Fixo Visual -->
                 <div class="summary-box">
                     <div class="summary-row">
-                        <span>Quantidade selecionada:</span>
-                        <strong id="summaryQtd">1 cota</strong>
+                        <span>Cotas escolhidas:</span>
+                        <strong id="summaryQtd">10 cotas</strong>
                     </div>
                     <div class="summary-row total-row">
-                        <span>Total a pagar:</span>
-                        <strong id="valorTotal" class="price-green">R$ 2,99</strong>
+                        <span>Total:</span>
+                        <strong id="valorTotal" class="price-green">R$ 29,90</strong>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-checkout">
-                    <span>GERAR PIX AGORA</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                <button type="submit" class="btn-checkout">GERAR PIX AGORA ⚡</button>
             </form>
-        </section>
-
-        <!-- Acordeão de Regulamento -->
-        <section class="card regulamento-card">
-            <button class="accordion-trigger" id="btnRegulamento">
-                <span>📄 Regulamento e Regras do Sorteio</span>
-                <span class="arrow-icon">▼</span>
-            </button>
-            <div class="accordion-content" id="panelRegulamento">
-                <ol class="rules-list">
-                    <li>O sorteio será realizado com base na <strong>Loteria Federal</strong> assim que 100% das cotas forem vendidas.</li>
-                    <li>Valor fixo da cota: <strong>R$ 2,99</strong>.</li>
-                    <li>O comprador deve informar o CPF corretamente para resgatar os números.</li>
-                    <li>O PIX gerado possui validade de 15 minutos para confirmação da reserva.</li>
-                </ol>
-            </div>
         </section>
 
     </main>
 
-    <!-- Bottom Dock Bar (Barra Fixa Inferior Mobile estilo App) -->
     <div class="bottom-dock">
-        <div class="dock-info">
-            <span class="dock-label">Total da Compra</span>
-            <span class="dock-price" id="dockTotal">R$ 2,99</span>
+        <div>
+            <span style="font-size:0.75rem; color:var(--text-muted)">Total</span><br>
+            <span class="dock-price" id="dockTotal">R$ 29,90</span>
         </div>
-        <button class="dock-btn" id="btnDockPagar">
-            PARTICIPAR ⚡
-        </button>
+        <button class="dock-btn" id="btnDockPagar">PARTICIPAR</button>
     </div>
 
-    <!-- Modal PIX Pop-up Mobile -->
+    <!-- Modal Pix -->
     <div class="modal-backdrop" id="modalPix">
         <div class="modal-sheet">
             <button class="sheet-close" id="closePix">&times;</button>
-            <div class="sheet-header">
-                <span class="sheet-badge">PAGAMENTO INSTANTÂNEO</span>
-                <h3>Código PIX Gerado ⚡</h3>
-                <p>Copie o código ou escaneie o QR Code abaixo no seu aplicativo do banco.</p>
-            </div>
-
-            <div class="qr-container">
-                <img id="imgQrCode" src="" alt="QR Code PIX" style="display:none;">
-            </div>
-
-            <div class="copia-cola-box">
-                <label>Código PIX Copia e Cola:</label>
-                <div class="copy-input-group">
-                    <input type="text" id="inputPixCode" readonly>
-                    <button id="btnCopiarPix">Copiar</button>
-                </div>
-            </div>
-
-            <div class="timer-badge">
-                ⏳ Aguardando confirmação do banco...
-            </div>
+            <h3>Pagamento PIX Gerado ⚡</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin:10px 0;">Copie a chave abaixo para pagar no app do seu banco:</p>
+            <input type="text" id="inputPixCode" readonly value="00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-42661417400052040000530398654029.90" style="width:100%; padding:10px; background:#0f172a; border:1px solid var(--card-border); color:#fff; border-radius:8px;">
+            <button id="btnCopiarPix" class="btn-checkout" style="margin-top:12px;">Copiar Código PIX</button>
         </div>
     </div>
 
-    <!-- Modal Consultar Bilhetes -->
-    <div class="modal-backdrop" id="modalBilhetes">
-        <div class="modal-sheet">
-            <button class="sheet-close" id="closeBilhetes">&times;</button>
-            <div class="sheet-header">
-                <h3>🎟️ Meus Bilhetes Comprados</h3>
-                <p>Digite seu CPF abaixo para visualizar suas cotas registradas.</p>
-            </div>
+    <script>
+        const PRECO_COTA = 2.99;
+        let quantidade = 10;
 
-            <div class="input-field" style="margin-top:15px;">
-                <input type="text" id="cpfConsulta" placeholder="Digite seu CPF" inputmode="numeric">
-            </div>
-            <button class="btn-checkout" id="btnBuscarBilhetes" style="margin-top:10px;">Buscar Cotas</button>
+        const qtdManual = document.getElementById('qtdManual');
+        const valorTotalEl = document.getElementById('valorTotal');
+        const dockTotalEl = document.getElementById('dockTotal');
+        const summaryQtdEl = document.getElementById('summaryQtd');
+        const tiles = document.querySelectorAll('.cota-tile');
 
-            <div id="resultadoBilhetes" class="tickets-results"></div>
-        </div>
-    </div>
+        function atualizar(v) {
+            quantidade = parseInt(v) || 1;
+            if(quantidade < 1) quantidade = 1;
+            qtdManual.value = quantidade;
+            summaryQtdEl.textContent = `${quantidade} cota${quantidade > 1 ? 's' : ''}`;
+            const total = (quantidade * PRECO_COTA).toFixed(2).replace('.', ',');
+            valorTotalEl.textContent = `R$ ${total}`;
+            dockTotalEl.textContent = `R$ ${total}`;
+        }
 
-    <!-- Modal Informações Genericas -->
-    <div class="modal-backdrop" id="modalInfo">
-        <div class="modal-sheet">
-            <button class="sheet-close" id="closeInfo">&times;</button>
-            <div class="sheet-header">
-                <h3 id="titleInfo">Informação</h3>
-            </div>
-            <div id="bodyInfo" class="modal-text-body"></div>
-        </div>
-    </div>
+        tiles.forEach(t => {
+            t.addEventListener('click', () => {
+                tiles.forEach(x => x.classList.remove('active'));
+                t.classList.add('active');
+                atualizar(t.getAttribute('data-qtd'));
+            });
+        });
 
-    <script src="script.js"></script>
+        document.getElementById('btnMinus').onclick = () => { tiles.forEach(x => x.classList.remove('active')); atualizar(quantidade - 1); };
+        document.getElementById('btnPlus').onclick = () => { tiles.forEach(x => x.classList.remove('active')); atualizar(quantidade + 1); };
+        qtdManual.oninput = (e) => { tiles.forEach(x => x.classList.remove('active')); atualizar(e.target.value); };
+
+        document.getElementById('openMenu').onclick = () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('overlay').classList.add('active'); };
+        document.getElementById('closeMenu').onclick = () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); };
+        document.getElementById('overlay').onclick = () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); };
+
+        document.getElementById('formCheckout').onsubmit = (e) => {
+            e.preventDefault();
+            document.getElementById('modalPix').classList.add('active');
+        };
+
+        document.getElementById('closePix').onclick = () => document.getElementById('modalPix').classList.remove('active');
+        document.getElementById('btnCopiarPix').onclick = () => {
+            navigator.clipboard.writeText(document.getElementById('inputPixCode').value);
+            alert("Código PIX copiado!");
+        };
+        document.getElementById('btnDockPagar').onclick = () => document.getElementById('secaoCheckout').scrollIntoView({behavior:'smooth'});
+    </script>
 </body>
 </html>
