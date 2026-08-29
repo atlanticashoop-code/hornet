@@ -1,108 +1,206 @@
-// Arquivo: /api/pix.js
+// Arquivo: script.js
 
-export default async function handler(req, res) {
-  // Configuração dos cabeçalhos CORS para permitir chamadas do front-end
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+document.addEventListener('DOMContentLoaded', () => {
+    const PRECO = 2.99;
+    let qtd = 10;
 
-  // Tratamento para requisições do tipo OPTIONS (preflight CORS)
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
+    const qtdInput = document.getElementById('qtdInput');
+    const dockVal = document.getElementById('dockVal');
+    const buttons = document.querySelectorAll('.btn-cota-rds');
 
-  // Permite apenas requisições POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método não permitido. Utilize POST.' });
-  }
-
-  try {
-    const { cpf, valor, qtd } = req.body;
-
-    // Limpa a string do CPF mantendo apenas dígitos
-    const cleanCpf = cpf ? cpf.replace(/\D/g, '') : '';
-
-    if (!cleanCpf || cleanCpf.length !== 11) {
-      return res.status(400).json({ message: 'CPF inválido. Envie um CPF com 11 dígitos.' });
+    // Atualiza o valor total com base nas cotas selecionadas
+    function update(val) {
+        qtd = parseInt(val) || 1;
+        if (qtd < 1) qtd = 1;
+        qtdInput.value = qtd;
+        const total = (qtd * PRECO).toFixed(2).replace('.', ',');
+        dockVal.textContent = `R$ ${total}`;
     }
 
-    const numericAmount = Number(valor);
-    if (!numericAmount || numericAmount <= 0) {
-      return res.status(400).json({ message: 'Valor inválido para a transação.' });
+    // Clique nos botões de cota rápida (+5, +10, +50, +100)
+    buttons.forEach(b => {
+        b.onclick = () => {
+            buttons.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            update(b.getAttribute('data-qtd'));
+        };
+    });
+
+    // Controles do Incremento/Decremento (+ e -)
+    const btnLess = document.getElementById('btnLess');
+    const btnMore = document.getElementById('btnMore');
+    if (btnLess) btnLess.onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd - 1); };
+    if (btnMore) btnMore.onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd + 1); };
+    if (qtdInput) qtdInput.oninput = (e) => { buttons.forEach(x => x.classList.remove('active')); update(e.target.value); };
+
+    /* CARROSSEL DE FOTOS */
+    let currentSlide = 0;
+    const track = document.getElementById('carouselTrack');
+    const dots = document.querySelectorAll('.dot');
+
+    function goToSlide(index) {
+        currentSlide = index;
+        if (track) track.style.transform = `translateX(-${currentSlide * 50}%)`;
+        dots.forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === currentSlide);
+        });
     }
 
-    // Busca o Token de Acesso configurado no painel da Vercel
-    const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+    const nextBtn = document.getElementById('nextSlide');
+    const prevBtn = document.getElementById('prevSlide');
+    if (nextBtn) nextBtn.onclick = () => goToSlide(currentSlide === 0 ? 1 : 0);
+    if (prevBtn) prevBtn.onclick = () => goToSlide(currentSlide === 1 ? 0 : 1);
+    dots.forEach((dot, idx) => dot.onclick = () => goToSlide(idx));
 
-    if (!token) {
-      return res.status(500).json({
-        message: 'MERCADO_PAGO_ACCESS_TOKEN não está configurado nas variáveis de ambiente da Vercel.'
-      });
-    }
+    /* GAVETA LATERAL / MENU */
+    const drawerMenu = document.getElementById('drawerMenu');
+    const drawerOverlay = document.getElementById('drawerOverlay');
 
-    // Payload de criação do pagamento conforme especificações do Mercado Pago
-    const paymentData = {
-      transaction_amount: numericAmount,
-      description: `RDS PRÊMIOS - ${qtd || 1} Cota(s)`,
-      payment_method_id: 'pix',
-      payer: {
-        email: `cliente_${cleanCpf}@rdspremios.com`,
-        first_name: 'Cliente',
-        last_name: 'RDS',
-        identification: {
-          type: 'CPF',
-          number: cleanCpf
+    function openDrawer() {
+        if (drawerMenu && drawerOverlay) {
+            drawerMenu.classList.add('active');
+            drawerOverlay.classList.add('active');
         }
-      }
-    };
-
-    // Chamada à API de pagamentos do Mercado Pago
-    const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'X-Idempotency-Key': `pix-${cleanCpf}-${Date.now()}`
-      },
-      body: JSON.stringify(paymentData)
-    });
-
-    const data = await mpResponse.json();
-
-    if (!mpResponse.ok) {
-      console.error('Erro retornado pela API do Mercado Pago:', data);
-      return res.status(mpResponse.status).json({
-        message: data.message || 'Erro ao gerar cobrança PIX no Mercado Pago.',
-        details: data.cause || data
-      });
     }
 
-    // Extrai o código "Copia e Cola" e a imagem base64 do QR Code
-    const qrCode = data.point_of_interaction?.transaction_data?.qr_code;
-    const qrCodeBase64 = data.point_of_interaction?.transaction_data?.qr_code_base64;
-
-    if (!qrCode) {
-      return res.status(500).json({
-        message: 'A resposta do Mercado Pago não retornou o código Pix.',
-        details: data
-      });
+    function closeDrawer() {
+        if (drawerMenu && drawerOverlay) {
+            drawerMenu.classList.remove('active');
+            drawerOverlay.classList.remove('active');
+        }
     }
 
-    // Retorno de sucesso para o front-end
-    return res.status(200).json({
-      id: data.id,
-      status: data.status,
-      qr_code: qrCode,
-      qr_code_base64: qrCodeBase64
-    });
+    const openDrawerBtn = document.getElementById('openDrawer');
+    const closeDrawerBtn = document.getElementById('closeDrawer');
+    if (openDrawerBtn) openDrawerBtn.onclick = openDrawer;
+    if (closeDrawerBtn) closeDrawerBtn.onclick = closeDrawer;
+    if (drawerOverlay) drawerOverlay.onclick = closeDrawer;
 
-  } catch (error) {
-    console.error('Erro interno no servidor (/api/pix.js):', error);
-    return res.status(500).json({ message: 'Erro interno ao processar a requisição.' });
-  }
-}
+    /* MODAIS */
+    const modalConsulta = document.getElementById('modalConsulta');
+    const modalRegulamento = document.getElementById('modalRegulamento');
+    const modalTermos = document.getElementById('modalTermos');
+    const modalPix = document.getElementById('modalPix');
+
+    function openModal(modal) {
+        closeDrawer();
+        if (modal) modal.classList.add('active');
+    }
+
+    // Eventos dos botões para abrir modais
+    const btnMeusNumeros = document.getElementById('btnMeusNumeros');
+    const navMeusBilhetes = document.getElementById('navMeusBilhetes');
+    const closeConsulta = document.getElementById('closeConsulta');
+    if (btnMeusNumeros) btnMeusNumeros.onclick = () => openModal(modalConsulta);
+    if (navMeusBilhetes) navMeusBilhetes.onclick = (e) => { e.preventDefault(); openModal(modalConsulta); };
+    if (closeConsulta) closeConsulta.onclick = () => modalConsulta.classList.remove('active');
+
+    const navRegulamento = document.getElementById('navRegulamento');
+    const footRegulamento = document.getElementById('footRegulamento');
+    const closeRegulamento = document.getElementById('closeRegulamento');
+    if (navRegulamento) navRegulamento.onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
+    if (footRegulamento) footRegulamento.onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
+    if (closeRegulamento) closeRegulamento.onclick = () => modalRegulamento.classList.remove('active');
+
+    const navTermos = document.getElementById('navTermos');
+    const footTermos = document.getElementById('footTermos');
+    const closeTermos = document.getElementById('closeTermos');
+    if (navTermos) navTermos.onclick = (e) => { e.preventDefault(); openModal(modalTermos); };
+    if (footTermos) footTermos.onclick = (e) => { e.preventDefault(); openModal(modalTermos); };
+    if (closeTermos) closeTermos.onclick = () => modalTermos.classList.remove('active');
+
+    const navInicio = document.getElementById('navInicio');
+    if (navInicio) {
+        navInicio.onclick = (e) => {
+            e.preventDefault();
+            closeDrawer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+    }
+
+    // Modal Pix e Copiar Chave
+    const closePix = document.getElementById('closePix');
+    const btnCopiar = document.getElementById('btnCopiar');
+    if (closePix) closePix.onclick = () => modalPix.classList.remove('active');
+    if (btnCopiar) {
+        btnCopiar.onclick = () => {
+            const pixInput = document.getElementById('pixCode');
+            pixInput.select();
+            navigator.clipboard.writeText(pixInput.value);
+            alert('Chave PIX copiada!');
+        };
+    }
+
+    // Botão Flutuante de Pagamento na Barra Inferior
+    const btnDockPagar = document.getElementById('btnDockPagar');
+    if (btnDockPagar) {
+        btnDockPagar.onclick = () => {
+            const checkoutSection = document.getElementById('checkoutSection');
+            if (checkoutSection) checkoutSection.scrollIntoView({ behavior: 'smooth' });
+        };
+    }
+
+    /* MÁSCARA AUTOMÁTICA DE CPF */
+    const cpfField = document.getElementById('cpfField');
+    if (cpfField) {
+        cpfField.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, "");
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            e.target.value = v;
+        });
+    }
+
+    /* SUBMISSÃO DO FORMULÁRIO / CHAMADA DA API NA VERCEL */
+    const rdsForm = document.getElementById('rdsForm');
+    if (rdsForm) {
+        rdsForm.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const cpf = document.getElementById('cpfField').value.replace(/\D/g, '');
+            const totalValor = parseFloat((qtd * PRECO).toFixed(2));
+            const btnSubmit = rdsForm.querySelector('.btn-comprar-green');
+            
+            if (cpf.length !== 11) {
+                alert('Por favor, informe um CPF válido.');
+                return;
+            }
+
+            btnSubmit.innerText = 'GERANDO PIX...';
+            btnSubmit.disabled = true;
+
+            try {
+                const response = await fetch('/api/pix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cpf, valor: totalValor, qtd })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const pixCopiaECola = data.qr_code || data.point_of_interaction?.transaction_data?.qr_code;
+                    const qrCodeBase64 = data.qr_code_base64 || data.point_of_interaction?.transaction_data?.qr_code_base64;
+
+                    if (pixCopiaECola && qrCodeBase64) {
+                        document.getElementById('pixCode').value = pixCopiaECola;
+                        document.getElementById('qrCodeImg').src = `data:image/png;base64,${qrCodeBase64}`;
+                        modalPix.classList.add('active');
+                    } else {
+                        alert('Erro ao carregar chave do Pix. Tente novamente.');
+                    }
+                } else {
+                    alert('Erro Mercado Pago: ' + (data.message || 'Verifique os dados informados.'));
+                    console.error('Detalhes do erro:', data);
+                }
+            } catch (error) {
+                alert('Erro ao conectar ao servidor de pagamento.');
+                console.error(error);
+            } finally {
+                btnSubmit.innerText = 'PAGAR COM PIX AGORA 🍀';
+                btnSubmit.disabled = false;
+            }
+        };
+    }
+});
