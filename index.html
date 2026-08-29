@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rifa da Moto - Sorteio Oficial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Fixo Topo -->
+    <header class="app-header">
+        <div class="logo-area">
+            <span class="logo-icon">🏍️</span>
+            <span class="logo-title">Rifa da Moto</span>
+        </div>
+        <button class="icon-btn" id="openMenu" aria-label="Abrir Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <!-- Menu Drawer Deslizante Lateral -->
+    <div class="drawer-overlay" id="overlay"></div>
+    <aside class="drawer-menu" id="sidebar">
+        <div class="drawer-header">
+            <h3>Menu do Participante</h3>
+            <button class="close-btn" id="closeMenu">&times;</button>
+        </div>
+        <div class="drawer-content">
+            <a href="#" class="drawer-item" id="menuMeusBilhetes">
+                <span class="item-icon">🎟️</span>
+                <div class="item-text">
+                    <strong>Meus Bilhetes</strong>
+                    <small>Consulte suas cotas compradas</small>
+                </div>
+            </a>
+            <a href="#" class="drawer-item" id="menuTermos">
+                <span class="item-icon">📜</span>
+                <div class="item-text">
+                    <strong>Termos de Uso</strong>
+                    <small>Regras e prazos do sorteio</small>
+                </div>
+            </a>
+            <a href="#" class="drawer-item" id="menuSuporte">
+                <span class="item-icon">💬</span>
+                <div class="item-text">
+                    <strong>Suporte WhatsApp</strong>
+                    <small>Fale com o organizador</small>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal Aplicativo -->
+    <main class="app-body">
+
+        <!-- Banner Galeria Foto -->
+        <section class="card hero-card">
+            <div class="image-wrapper">
+                <img src="https://i.postimg.cc/mD82yC4S/moto.jpg" alt="Foto da Moto" class="hero-img">
+                <span class="status-badge">🔥 SORTEIO ATIVO</span>
+            </div>
+            <div class="hero-info">
+                <h1>Moto Zero Km / Preparada</h1>
+                <p class="hero-desc">Participe agora mesmo! Apenas <strong>R$ 2,99</strong> por cota no PIX com confirmação na hora.</p>
+                
+                <div class="price-chip">
+                    <span class="chip-label">Valor por cota</span>
+                    <span class="chip-value">R$ 2,99</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seleção Ágil de Cotas (Mobile Touch Cards) -->
+        <section class="card cotas-card">
+            <div class="section-header">
+                <h2>⚡ Escolha suas Cotas</h2>
+                <span class="sub-header">Selecione uma opção rápida</span>
+            </div>
+
+            <!-- Grid de Botões Estilo App -->
+            <div class="cotas-grid">
+                <button class="cota-tile" data-qtd="5">
+                    <span class="tile-qty">+5</span>
+                    <span class="tile-label">Cotas</span>
+                    <span class="tile-price">R$ 14,95</span>
+                </button>
+                <button class="cota-tile popular" data-qtd="10">
+                    <span class="popular-badge">MAIS VENDIDO</span>
+                    <span class="tile-qty">+10</span>
+                    <span class="tile-label">Cotas</span>
+                    <span class="tile-price">R$ 29,90</span>
+                </button>
+                <button class="cota-tile" data-qtd="50">
+                    <span class="tile-qty">+50</span>
+                    <span class="tile-label">Cotas</span>
+                    <span class="tile-price">R$ 149,50</span>
+                </button>
+                <button class="cota-tile highlight" data-qtd="100">
+                    <span class="tile-qty">+100</span>
+                    <span class="tile-label">Cotas</span>
+                    <span class="tile-price">R$ 299,00</span>
+                </button>
+            </div>
+
+            <!-- Seletor de Quantidade Customizada Touch -->
+            <div class="custom-qty-wrapper">
+                <span class="custom-title">Ou informe outra quantidade:</span>
+                <div class="qty-stepper">
+                    <button class="step-btn" id="btnMinus">-</button>
+                    <input type="number" id="qtdManual" value="1" min="1" inputmode="numeric">
+                    <button class="step-btn" id="btnPlus">+</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Formulário Rápido de Compra -->
+        <section class="card checkout-card" id="secaoCheckout">
+            <div class="section-header">
+                <h2>👤 Identificação para Reserva</h2>
+                <span class="sub-header">Seus bilhetes ficarão salvos no seu CPF</span>
+            </div>
+
+            <form id="formCheckout" class="checkout-form">
+                <div class="input-field">
+                    <label for="cpfInput">CPF do Comprador</label>
+                    <div class="input-with-icon">
+                        <span class="field-icon">🪪</span>
+                        <input type="text" id="cpfInput" placeholder="000.000.000-00" required maxlength="14" inputmode="numeric">
+                    </div>
+                </div>
+
+                <!-- Resumo Fixo Visual -->
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span>Quantidade selecionada:</span>
+                        <strong id="summaryQtd">1 cota</strong>
+                    </div>
+                    <div class="summary-row total-row">
+                        <span>Total a pagar:</span>
+                        <strong id="valorTotal" class="price-green">R$ 2,99</strong>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-checkout">
+                    <span>GERAR PIX AGORA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </form>
+        </section>
+
+        <!-- Acordeão de Regulamento -->
+        <section class="card regulamento-card">
+            <button class="accordion-trigger" id="btnRegulamento">
+                <span>📄 Regulamento e Regras do Sorteio</span>
+                <span class="arrow-icon">▼</span>
+            </button>
+            <div class="accordion-content" id="panelRegulamento">
+                <ol class="rules-list">
+                    <li>O sorteio será realizado com base na <strong>Loteria Federal</strong> assim que 100% das cotas forem vendidas.</li>
+                    <li>Valor fixo da cota: <strong>R$ 2,99</strong>.</li>
+                    <li>O comprador deve informar o CPF corretamente para resgatar os números.</li>
+                    <li>O PIX gerado possui validade de 15 minutos para confirmação da reserva.</li>
+                </ol>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Dock Bar (Barra Fixa Inferior Mobile estilo App) -->
+    <div class="bottom-dock">
+        <div class="dock-info">
+            <span class="dock-label">Total da Compra</span>
+            <span class="dock-price" id="dockTotal">R$ 2,99</span>
+        </div>
+        <button class="dock-btn" id="btnDockPagar">
+            PARTICIPAR ⚡
+        </button>
+    </div>
+
+    <!-- Modal PIX Pop-up Mobile -->
+    <div class="modal-backdrop" id="modalPix">
+        <div class="modal-sheet">
+            <button class="sheet-close" id="closePix">&times;</button>
+            <div class="sheet-header">
+                <span class="sheet-badge">PAGAMENTO INSTANTÂNEO</span>
+                <h3>Código PIX Gerado ⚡</h3>
+                <p>Copie o código ou escaneie o QR Code abaixo no seu aplicativo do banco.</p>
+            </div>
+
+            <div class="qr-container">
+                <img id="imgQrCode" src="" alt="QR Code PIX" style="display:none;">
+            </div>
+
+            <div class="copia-cola-box">
+                <label>Código PIX Copia e Cola:</label>
+                <div class="copy-input-group">
+                    <input type="text" id="inputPixCode" readonly>
+                    <button id="btnCopiarPix">Copiar</button>
+                </div>
+            </div>
+
+            <div class="timer-badge">
+                ⏳ Aguardando confirmação do banco...
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Consultar Bilhetes -->
+    <div class="modal-backdrop" id="modalBilhetes">
+        <div class="modal-sheet">
+            <button class="sheet-close" id="closeBilhetes">&times;</button>
+            <div class="sheet-header">
+                <h3>🎟️ Meus Bilhetes Comprados</h3>
+                <p>Digite seu CPF abaixo para visualizar suas cotas registradas.</p>
+            </div>
+
+            <div class="input-field" style="margin-top:15px;">
+                <input type="text" id="cpfConsulta" placeholder="Digite seu CPF" inputmode="numeric">
+            </div>
+            <button class="btn-checkout" id="btnBuscarBilhetes" style="margin-top:10px;">Buscar Cotas</button>
+
+            <div id="resultadoBilhetes" class="tickets-results"></div>
+        </div>
+    </div>
+
+    <!-- Modal Informações Genericas -->
+    <div class="modal-backdrop" id="modalInfo">
+        <div class="modal-sheet">
+            <button class="sheet-close" id="closeInfo">&times;</button>
+            <div class="sheet-header">
+                <h3 id="titleInfo">Informação</h3>
+            </div>
+            <div id="bodyInfo" class="modal-text-body"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
