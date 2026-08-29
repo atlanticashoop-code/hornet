@@ -10,18 +10,22 @@ export default async function handler(req, res) {
     }
 
     const { cpf, valor, qtd } = req.body;
-    const cpfLimpo = String(cpf).replace(/\D/g, '');
+    const cpfLimpo = String(cpf || '').replace(/\D/g, '');
+
+    // Gera um código único de idempotência para cada tentativa de pagamento
+    const idempotencyKey = `pix-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     try {
         const response = await fetch('https://api.mercadopago.com/v1/payments', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token.trim()}`
+                'Authorization': `Bearer ${token.trim()}`,
+                'X-Idempotency-Key': idempotencyKey
             },
             body: JSON.stringify({
                 transaction_amount: Number(valor),
-                description: `Cotas Hornetão Blue - Qtd: ${qtd}`,
+                description: `Cotas Hornet - Qtd: ${qtd || 1}`,
                 payment_method_id: 'pix',
                 payer: {
                     email: `cliente_${Date.now()}@email.com`,
