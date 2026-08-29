@@ -1,188 +1,108 @@
-// URL do servidor Back-end no Render
-const API_URL = "https://SEU-SERVIDOR-BACKEND.onrender.com";
-const PRECO_COTA = 2.99;
-let quantidadeSelecionada = 1;
+// Arquivo: /api/pix.js
 
-// Elementos da DOM
-const qtdManual = document.getElementById('qtdManual');
-const valorTotalEl = document.getElementById('valorTotal');
-const dockTotalEl = document.getElementById('dockTotal');
-const summaryQtdEl = document.getElementById('summaryQtd');
-const tiles = document.querySelectorAll('.cota-tile');
-const cpfInput = document.getElementById('cpfInput');
+export default async function handler(req, res) {
+  // Configuração dos cabeçalhos CORS para permitir chamadas do front-end
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
-// Atualizar valor total
-function atualizarTotal(qtd) {
-    quantidadeSelecionada = parseInt(qtd) || 1;
-    if (quantidadeSelecionada < 1) quantidadeSelecionada = 1;
-    
-    qtdManual.value = quantidadeSelecionada;
-    summaryQtdEl.textContent = `${quantidadeSelecionada} cota${quantidadeSelecionada > 1 ? 's' : ''}`;
-    
-    const total = (quantidadeSelecionada * PRECO_COTA).toFixed(2).replace('.', ',');
-    valorTotalEl.textContent = `R$ ${total}`;
-    dockTotalEl.textContent = `R$ ${total}`;
-}
+  // Tratamento para requisições do tipo OPTIONS (preflight CORS)
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
-// Botões rápidos de cota
-tiles.forEach(tile => {
-    tile.addEventListener('click', () => {
-        tiles.forEach(t => t.classList.remove('active'));
-        tile.classList.add('active');
-        const qtd = tile.getAttribute('data-qtd');
-        atualizarTotal(qtd);
+  // Permite apenas requisições POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Método não permitido. Utilize POST.' });
+  }
+
+  try {
+    const { cpf, valor, qtd } = req.body;
+
+    // Limpa a string do CPF mantendo apenas dígitos
+    const cleanCpf = cpf ? cpf.replace(/\D/g, '') : '';
+
+    if (!cleanCpf || cleanCpf.length !== 11) {
+      return res.status(400).json({ message: 'CPF inválido. Envie um CPF com 11 dígitos.' });
+    }
+
+    const numericAmount = Number(valor);
+    if (!numericAmount || numericAmount <= 0) {
+      return res.status(400).json({ message: 'Valor inválido para a transação.' });
+    }
+
+    // Busca o Token de Acesso configurado no painel da Vercel
+    const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+
+    if (!token) {
+      return res.status(500).json({
+        message: 'MERCADO_PAGO_ACCESS_TOKEN não está configurado nas variáveis de ambiente da Vercel.'
+      });
+    }
+
+    // Payload de criação do pagamento conforme especificações do Mercado Pago
+    const paymentData = {
+      transaction_amount: numericAmount,
+      description: `RDS PRÊMIOS - ${qtd || 1} Cota(s)`,
+      payment_method_id: 'pix',
+      payer: {
+        email: `cliente_${cleanCpf}@rdspremios.com`,
+        first_name: 'Cliente',
+        last_name: 'RDS',
+        identification: {
+          type: 'CPF',
+          number: cleanCpf
+        }
+      }
+    };
+
+    // Chamada à API de pagamentos do Mercado Pago
+    const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'X-Idempotency-Key': `pix-${cleanCpf}-${Date.now()}`
+      },
+      body: JSON.stringify(paymentData)
     });
-});
 
-// Incremento e decremento (+ e -)
-document.getElementById('btnMinus').addEventListener('click', () => {
-    tiles.forEach(t => t.classList.remove('active'));
-    atualizarTotal(quantidadeSelecionada - 1);
-});
+    const data = await mpResponse.json();
 
-document.getElementById('btnPlus').addEventListener('click', () => {
-    tiles.forEach(t => t.classList.remove('active'));
-    atualizarTotal(quantidadeSelecionada + 1);
-});
+    if (!mpResponse.ok) {
+      console.error('Erro retornado pela API do Mercado Pago:', data);
+      return res.status(mpResponse.status).json({
+        message: data.message || 'Erro ao gerar cobrança PIX no Mercado Pago.',
+        details: data.cause || data
+      });
+    }
 
-qtdManual.addEventListener('input', (e) => {
-    tiles.forEach(t => t.classList.remove('active'));
-    atualizarTotal(e.target.value);
-});
+    // Extrai o código "Copia e Cola" e a imagem base64 do QR Code
+    const qrCode = data.point_of_interaction?.transaction_data?.qr_code;
+    const qrCodeBase64 = data.point_of_interaction?.transaction_data?.qr_code_base64;
 
-// Rolagem suave ao clicar na barra inferior no celular
-document.getElementById('btnDockPagar').addEventListener('click', () => {
-    document.getElementById('secaoCheckout').scrollIntoView({ behavior: 'smooth' });
-});
+    if (!qrCode) {
+      return res.status(500).json({
+        message: 'A resposta do Mercado Pago não retornou o código Pix.',
+        details: data
+      });
+    }
 
-// Máscara de CPF para iPhone
-cpfInput.addEventListener('input', (e) => {
-    let v = e.target.value.replace(/\D/g, '');
-    if (v.length > 11) v = v.slice(0, 11);
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    e.target.value = v;
-});
+    // Retorno de sucesso para o front-end
+    return res.status(200).json({
+      id: data.id,
+      status: data.status,
+      qr_code: qrCode,
+      qr_code_base64: qrCodeBase64
+    });
 
-// Menu Drawer
-const openMenu = document.getElementById('openMenu');
-const closeMenu = document.getElementById('closeMenu');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
-
-function toggleSidebar() {
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
+  } catch (error) {
+    console.error('Erro interno no servidor (/api/pix.js):', error);
+    return res.status(500).json({ message: 'Erro interno ao processar a requisição.' });
+  }
 }
-
-openMenu.addEventListener('click', toggleSidebar);
-closeMenu.addEventListener('click', toggleSidebar);
-overlay.addEventListener('click', toggleSidebar);
-
-// Accordion
-const btnRegulamento = document.getElementById('btnRegulamento');
-const panelRegulamento = document.getElementById('panelRegulamento');
-
-btnRegulamento.addEventListener('click', () => {
-    panelRegulamento.classList.toggle('show');
-});
-
-// Modais
-const modalPix = document.getElementById('modalPix');
-const modalBilhetes = document.getElementById('modalBilhetes');
-const modalInfo = document.getElementById('modalInfo');
-
-document.getElementById('closePix').onclick = () => modalPix.classList.remove('active');
-document.getElementById('closeBilhetes').onclick = () => modalBilhetes.classList.remove('active');
-document.getElementById('closeInfo').onclick = () => modalInfo.classList.remove('active');
-
-document.getElementById('menuMeusBilhetes').onclick = (e) => {
-    e.preventDefault(); toggleSidebar(); modalBilhetes.classList.add('active');
-};
-
-document.getElementById('menuTermos').onclick = (e) => {
-    e.preventDefault(); toggleSidebar();
-    document.getElementById('titleInfo').textContent = "Termos de Uso";
-    document.getElementById('bodyInfo').innerHTML = "<p style='color:#94a3b8; font-size:0.88rem; line-height:1.5;'>Sorteio transparente. Os bilhetes reservados não pagos dentro de 15 minutos são automaticamente reabertos no sistema.</p>";
-    modalInfo.classList.add('active');
-};
-
-document.getElementById('menuSuporte').onclick = (e) => {
-    e.preventDefault(); toggleSidebar();
-    document.getElementById('titleInfo').textContent = "Suporte WhatsApp";
-    document.getElementById('bodyInfo').innerHTML = "<p style='color:#94a3b8; font-size:0.88rem; line-height:1.5;'>Precisa de ajuda? Entre em contato diretamente pelo WhatsApp do organizador.</p>";
-    modalInfo.classList.add('active');
-};
-
-// Checkout Form Submission
-document.getElementById('formCheckout').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const cpf = cpfInput.value;
-    if (cpf.length < 14) {
-        alert("Por favor, digite um CPF válido.");
-        return;
-    }
-
-    const valorTotal = (quantidadeSelecionada * PRECO_COTA).toFixed(2);
-    const cotas = Array.from({length: quantidadeSelecionada}, () => Math.floor(100000 + Math.random() * 900000));
-
-    try {
-        const response = await fetch(`${API_URL}/api/criar-pix`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cpf, quantidade: quantidadeSelecionada, valorTotal, cotasSelecionadas: cotas })
-        });
-
-        const data = await response.json();
-
-        if (data.sucesso) {
-            document.getElementById('inputPixCode').value = data.qrCode;
-            if(data.qrCodeBase64) {
-                const img = document.getElementById('imgQrCode');
-                img.src = `data:image/png;base64,${data.qrCodeBase64}`;
-                img.style.display = 'block';
-            }
-            modalPix.classList.add('active');
-        } else {
-            alert(data.erro || "Erro ao gerar chave PIX.");
-        }
-    } catch (err) {
-        alert("Modo de teste: O servidor Back-end precisa estar no ar para gerar o PIX real.");
-    }
-});
-
-// Copiar PIX
-document.getElementById('btnCopiarPix').addEventListener('click', () => {
-    const copyText = document.getElementById('inputPixCode');
-    copyText.select();
-    navigator.clipboard.writeText(copyText.value);
-    alert("Código PIX copiado com sucesso!");
-});
-
-// Buscar Bilhetes
-document.getElementById('btnBuscarBilhetes').addEventListener('click', async () => {
-    const cpf = document.getElementById('cpfConsulta').value;
-    const resDiv = document.getElementById('resultadoBilhetes');
-    resDiv.innerHTML = "<p style='color:#94a3b8;'>Buscando bilhetes...</p>";
-
-    try {
-        const response = await fetch(`${API_URL}/api/bilhetes/${cpf}`);
-        const data = await response.json();
-
-        if (data.length === 0) {
-            resDiv.innerHTML = "<p style='color:#94a3b8; margin-top:10px;'>Nenhum bilhete encontrado.</p>";
-            return;
-        }
-
-        resDiv.innerHTML = data.map(b => `
-            <div style="background:#0f172a; border:1px solid #334155; border-radius:10px; padding:12px; margin-top:10px; text-align:left;">
-                <p style="color:#60a5fa; font-weight:700;">Status: ${b.status}</p>
-                <p style="font-size:0.85rem; color:#f8fafc; margin-top:4px;">Cotas: ${JSON.parse(b.cotas).join(', ')}</p>
-                <p style="font-size:0.8rem; color:#94a3b8; margin-top:4px;">Total: R$ ${b.valor_total}</p>
-            </div>
-        `).join('');
-    } catch (err) {
-        resDiv.innerHTML = "<p style='color:#ef4444; margin-top:10px;'>Erro ao buscar bilhetes.</p>";
-    }
-});
