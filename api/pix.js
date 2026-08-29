@@ -12,7 +12,6 @@ export default async function handler(req, res) {
     const { cpf, valor, qtd } = req.body;
     const cpfLimpo = String(cpf || '').replace(/\D/g, '');
 
-    // Gera uma chave de idempotência única para cada requisição
     const idempotencyKey = `pix-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     try {
@@ -25,7 +24,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 transaction_amount: Number(valor),
-                description: `Cotas Hornet - Qtd: ${qtd || 1}`,
+                description: `Cotas Rifa Moto - Qtd: ${qtd || 1}`,
                 payment_method_id: 'pix',
                 payer: {
                     email: `cliente_${Date.now()}@email.com`,
@@ -46,11 +45,11 @@ export default async function handler(req, res) {
             });
         }
 
-        // Retorna o código BR Code do Pix (Pix Copia e Cola) e a imagem em Base64
+        // Retorna a resposta completa da API + atalhos para garantir compatibilidade com o HTML
         return res.status(200).json({
-            id: data.id,
-            qr_code: data.point_of_interaction.transaction_data.qr_code,
-            qr_code_base64: data.point_of_interaction.transaction_data.qr_code_base64
+            ...data,
+            qr_code: data.point_of_interaction?.transaction_data?.qr_code,
+            qr_code_base64: data.point_of_interaction?.transaction_data?.qr_code_base64
         });
 
     } catch (error) {
