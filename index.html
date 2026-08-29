@@ -7,6 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- SDK OFICIAL MERCADO PAGO -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+
     <style>
         :root {
             --bg-body: #0a0c10;
@@ -775,7 +779,6 @@
             <h3 style="color:var(--primary-yellow); font-weight:900;">PAGAMENTO PIX ⚡</h3>
             <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 10px 0;">Escaneie o QR Code ou copie o código Pix Copia e Cola:</p>
             
-            <!-- Imagem do QR Code Gerado -->
             <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code PIX">
 
             <input type="text" id="pixCode" readonly style="width:100%; padding:12px; background:#080a0e; border:1px solid var(--border-color); color:#fff; border-radius:8px; font-weight:700; text-align:center;">
@@ -824,7 +827,7 @@
     </div>
 
     <script>
-        // COLOQUE SEU ACCESS TOKEN DO MERCADO PAGO ENTRE AS ASPAS ABAIXO:
+        // COLOQUE SEU ACCESS TOKEN DO MERCADO PAGO AQUI:
         const MERCADO_PAGO_TOKEN = 'TEST-3786384884682238-082801-1e6446e548d1ac2b67c973d6720bfb07-245889948'; 
 
         const PRECO = 2.99;
@@ -854,7 +857,7 @@
         document.getElementById('btnMore').onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd + 1); };
         qtdInput.oninput = (e) => { buttons.forEach(x => x.classList.remove('active')); update(e.target.value); };
 
-        /* LÓGICA DO CARROSSEL DE FOTOS */
+        /* CARROSSEL */
         let currentSlide = 0;
         const track = document.getElementById('carouselTrack');
         const dots = document.querySelectorAll('.dot');
@@ -889,7 +892,7 @@
         document.getElementById('closeDrawer').onclick = closeDrawer;
         drawerOverlay.onclick = closeDrawer;
 
-        /* MODAIS E AÇÕES DE NAVEGAÇÃO */
+        /* MODAIS */
         const modalConsulta = document.getElementById('modalConsulta');
         const modalRegulamento = document.getElementById('modalRegulamento');
         const modalTermos = document.getElementById('modalTermos');
@@ -928,7 +931,7 @@
             document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
         };
 
-        /* INTEGRAÇÃO MERCADO PAGO VIA PIX */
+        /* INTEGRAÇÃO MERCADO PAGO VIA PIX COM TRATAMENTO DE RETORNO */
         document.getElementById('rdsForm').onsubmit = async (e) => {
             e.preventDefault();
             
@@ -951,7 +954,7 @@
                         description: `Cotas Hornetão Blue - Qtd: ${qtd}`,
                         payment_method_id: 'pix',
                         payer: {
-                            email: 'cliente@email.com',
+                            email: `cliente${Date.now()}@gmail.com`,
                             identification: {
                                 type: 'CPF',
                                 number: cpf
@@ -971,11 +974,12 @@
                     
                     modalPix.classList.add('active');
                 } else {
-                    alert('Erro ao gerar o PIX: ' + (data.message || 'Verifique se o CPF é válido.'));
+                    alert('Erro ao gerar PIX: ' + (data.message || 'Verifique se o CPF é válido.'));
+                    console.log('Detalhes:', data);
                 }
             } catch (error) {
-                console.error('Erro ao gerar PIX:', error);
-                alert('Falha na comunicação com a API do Mercado Pago.');
+                console.error('Erro de requisição:', error);
+                alert('Erro ao comunicar com a API do Mercado Pago.');
             } finally {
                 btnSubmit.innerText = 'PAGAR COM PIX AGORA 🍀';
                 btnSubmit.disabled = false;
@@ -984,4 +988,3 @@
     </script>
 </body>
 </html>
-
