@@ -3,36 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rifa da Moto - Sorteio Oficial</title>
+    <title>RDS PRÊMIOS - Sorteio da Moto</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --card-border: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #2563eb;
-            --accent-green: #10b981;
-            --accent-green-dark: #059669;
-            --accent-gold: #f59e0b;
-            --radius-lg: 16px;
-            --radius-md: 12px;
-            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --bg-body: #0a0c10;
+            --bg-card: #121620;
+            --bg-card-hover: #1a202c;
+            --border-color: #232d3f;
+            --primary-yellow: #ffc107;
+            --primary-green: #00e676;
+            --primary-green-dark: #00b0ff;
+            --text-main: #ffffff;
+            --text-sub: #a0aec0;
+            --radius-main: 14px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: var(--font-family);
+            font-family: 'Montserrat', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-body);
             color: var(--text-main);
             padding-top: 65px;
             padding-bottom: 90px;
@@ -40,234 +38,316 @@
             justify-content: center;
         }
 
-        .app-header {
+        /* Topo Estilo RDS PRÊMIOS */
+        .rds-header {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(15, 23, 42, 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            top: 0; left: 0; right: 0;
+            height: 62px;
+            background: #06080c;
+            border-bottom: 2px solid var(--primary-yellow);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 16px;
-            border-bottom: 1px solid var(--card-border);
             z-index: 100;
         }
 
-        .logo-area { display: flex; align-items: center; gap: 8px; }
-        .logo-icon { font-size: 1.4rem; }
-        .logo-title { font-weight: 800; font-size: 1.1rem; color: #fff; }
-
-        .icon-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: var(--text-main);
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+        .brand-logo {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: var(--primary-yellow);
+            letter-spacing: -0.5px;
+        }
+
+        .btn-meus-numeros {
+            background: var(--primary-yellow);
+            color: #000;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
         }
 
-        .app-body {
+        .main-container {
             width: 100%;
             max-width: 480px;
-            padding: 16px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg);
-            padding: 18px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
-
-        .hero-card { padding: 12px; }
-
-        .image-wrapper {
-            position: relative;
-            width: 100%;
-            border-radius: var(--radius-md);
+        /* Card Principal da Rifa */
+        .card-rifa {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
             overflow: hidden;
         }
 
-        .hero-img {
+        .banner-container {
+            position: relative;
             width: 100%;
-            height: 220px;
-            object-fit: cover;
-            display: block;
+            height: 240px;
         }
 
-        .status-badge {
+        .banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tag-status {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(16, 185, 129, 0.9);
+            top: 12px;
+            left: 12px;
+            background: #e53e3e;
             color: #fff;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 800;
             padding: 4px 10px;
             border-radius: 20px;
+            text-transform: uppercase;
         }
 
-        .hero-info { padding: 12px 6px 4px 6px; }
-        .hero-info h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
-        .hero-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; }
+        .rifa-content {
+            padding: 16px;
+        }
 
-        .price-chip {
+        .rifa-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .rifa-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 14px;
+        }
+
+        /* Barra de Progresso de Vendas */
+        .progress-box {
+            background: #080a0e;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 14px;
+        }
+
+        .progress-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            background: rgba(37, 99, 235, 0.15);
-            border: 1px solid rgba(37, 99, 235, 0.3);
-            padding: 10px 14px;
-            border-radius: var(--radius-md);
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-sub);
         }
 
-        .chip-label { font-size: 0.85rem; color: var(--text-muted); }
-        .chip-value { font-size: 1.1rem; font-weight: 800; color: #60a5fa; }
-
-        .section-header { margin-bottom: 14px; }
-        .section-header h2 { font-size: 1.1rem; font-weight: 700; }
-        .sub-header { font-size: 0.8rem; color: var(--text-muted); }
-
-        .cotas-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .cota-tile {
-            position: relative;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1.5px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 14px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .cota-tile.active {
-            border-color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.12);
-        }
-
-        .tile-qty { font-size: 1.3rem; font-weight: 800; color: var(--text-main); }
-        .tile-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
-        .tile-price { font-size: 0.85rem; font-weight: 700; color: var(--accent-green); }
-
-        .popular-badge {
-            position: absolute;
-            top: -9px;
-            background: var(--accent-gold);
-            color: #000;
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-
-        .custom-qty-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 10px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .qty-stepper {
-            display: flex;
-            align-items: center;
-            background: #0f172a;
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-md);
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #1a202c;
+            border-radius: 5px;
             overflow: hidden;
         }
 
-        .step-btn {
+        .progress-bar-fill {
+            width: 78%; /* Porcentagem vendida */
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-yellow) 0%, var(--primary-green) 100%);
+            border-radius: 5px;
+        }
+
+        /* Destaque do Preço */
+        .price-tag-rds {
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid var(--primary-green);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-tag-rds span { font-size: 0.85rem; color: var(--text-sub); font-weight: 600; }
+        .price-tag-rds strong { font-size: 1.3rem; color: var(--primary-green); font-weight: 900; }
+
+        /* Cotas Premiadas estilo RDS */
+        .cotas-premiadas-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cotas-badges {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+
+        .badge-numero {
+            background: #1a202c;
+            border: 1px solid var(--primary-yellow);
+            color: var(--primary-yellow);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* Grade de Seleção de Cotas estilo RDS */
+        .selecao-cotas-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
+            padding: 16px;
+        }
+
+        .grid-rapida {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-cota-rds {
+            background: #161b26;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .btn-cota-rds.active {
+            border-color: var(--primary-green);
+            background: rgba(0, 230, 118, 0.08);
+        }
+
+        .btn-cota-rds .qtd { font-size: 1.4rem; font-weight: 900; color: #fff; }
+        .btn-cota-rds .lbl { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; font-weight: 700; }
+        .btn-cota-rds .val { font-size: 0.85rem; font-weight: 800; color: var(--primary-green); margin-top: 2px; }
+
+        .pop-tag {
+            position: absolute;
+            top: -10px;
+            background: var(--primary-yellow);
+            color: #000;
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        /* Seletor manual (+ e -) */
+        .stepper-rds {
+            display: flex;
+            align-items: center;
+            margin-top: 14px;
+            background: #080a0e;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .stepper-rds button {
             width: 50px;
-            height: 44px;
-            background: var(--card-bg);
+            height: 46px;
+            background: #1a202c;
             border: none;
-            color: var(--text-main);
+            color: #fff;
             font-size: 1.4rem;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
         }
 
-        .qty-stepper input {
+        .stepper-rds input {
             flex: 1;
             background: transparent;
             border: none;
             text-align: center;
-            color: var(--text-main);
+            color: #fff;
+            font-weight: 800;
             font-size: 1.1rem;
-            font-weight: 700;
         }
 
-        .checkout-form { display: flex; flex-direction: column; gap: 14px; }
-        .input-field { display: flex; flex-direction: column; gap: 6px; }
-        .input-field label { font-size: 0.82rem; color: var(--text-muted); }
+        /* Formulário de Finalização */
+        .checkout-card-rds {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
+            padding: 16px;
+        }
 
-        .input-with-icon input {
-            width: 100%;
-            background: #0f172a;
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 12px 12px 12px 14px;
-            color: var(--text-main);
+        .field-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .field-box label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
+
+        .field-box input {
+            background: #080a0e;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 700;
             font-size: 1rem;
-            font-weight: 600;
             outline: none;
         }
 
-        .summary-box {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: var(--radius-md);
-            padding: 12px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .summary-row { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--text-muted); }
-        .total-row { font-size: 1rem; color: var(--text-main); padding-top: 6px; border-top: 1px dashed var(--card-border); }
-        .price-green { color: var(--accent-green); font-size: 1.2rem; }
-
-        .btn-checkout {
+        .btn-comprar-green {
             width: 100%;
-            background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-green-dark) 100%);
-            color: #fff;
+            background: var(--primary-green);
+            color: #000;
             border: none;
-            border-radius: var(--radius-md);
             padding: 16px;
-            font-size: 1rem;
-            font-weight: 800;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1.05rem;
+            margin-top: 14px;
             cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3);
+            text-transform: uppercase;
         }
 
-        .bottom-dock {
+        /* Bottom Dock Bar Fixo */
+        .bottom-bar-rds {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 75px;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
+            bottom: 0; left: 0; right: 0;
+            height: 70px;
+            background: #06080c;
+            border-top: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -275,220 +355,230 @@
             z-index: 90;
         }
 
-        .dock-price { font-size: 1.25rem; font-weight: 800; color: var(--accent-green); }
-        .dock-btn {
-            background: var(--accent-green);
-            color: #fff;
+        .dock-val { font-size: 1.3rem; font-weight: 900; color: var(--primary-green); }
+
+        .dock-btn-rds {
+            background: var(--primary-green);
+            color: #000;
             border: none;
-            border-radius: var(--radius-md);
             padding: 12px 20px;
-            font-weight: 800;
+            border-radius: 10px;
+            font-weight: 900;
+            font-size: 0.9rem;
             cursor: pointer;
+            text-transform: uppercase;
         }
 
-        .drawer-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 200;
-        }
-        .drawer-overlay.active { display: block; }
-
-        .drawer-menu {
-            position: fixed; top: 0; right: -300px; width: 300px; height: 100%;
-            background: var(--card-bg); z-index: 210; transition: right 0.3s ease; padding: 20px;
-        }
-        .drawer-menu.active { right: 0; }
-
-        .drawer-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px;
-            background: rgba(255,255,255,0.03); border-radius: var(--radius-md);
-            text-decoration: none; color: #fff; margin-bottom: 10px;
-        }
-
-        .modal-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+        /* Modal Generico */
+        .modal-bg {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             display: none; align-items: flex-end; justify-content: center; z-index: 300;
         }
-        .modal-backdrop.active { display: flex; }
+        .modal-bg.active { display: flex; }
 
-        .modal-sheet {
-            background: var(--card-bg); width: 100%; max-width: 480px;
+        .modal-body {
+            background: var(--bg-card);
+            width: 100%; max-width: 480px;
             border-top-left-radius: 20px; border-top-right-radius: 20px;
             padding: 24px 20px; position: relative;
+            border-top: 2px solid var(--primary-yellow);
         }
-        .sheet-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 1.8rem; }
+
+        .modal-close {
+            position: absolute; top: 16px; right: 16px;
+            background: none; border: none; color: var(--text-sub); font-size: 1.8rem;
+        }
     </style>
 </head>
 <body>
 
-    <header class="app-header">
-        <div class="logo-area">
-            <span class="logo-icon">🏍️</span>
-            <span class="logo-title">Rifa da Moto</span>
+    <!-- Topo Oficial RDS PRÊMIOS -->
+    <header class="rds-header">
+        <div class="brand-logo">
+            ⚡ RDS PRÊMIOS
         </div>
-        <button class="icon-btn" id="openMenu">☰</button>
+        <button class="btn-meus-numeros" id="btnMeusNumeros">
+            🔍 MEUS NÚMEROS
+        </button>
     </header>
 
-    <div class="drawer-overlay" id="overlay"></div>
-    <aside class="drawer-menu" id="sidebar">
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <h3>Menu do Site</h3>
-            <button id="closeMenu" style="background:none; border:none; color:#fff; font-size:1.5rem;">✕</button>
-        </div>
-        <a href="#" class="drawer-item" id="menuMeusBilhetes">🎟️ Meus Bilhetes</a>
-        <a href="#" class="drawer-item" id="menuTermos">📜 Termos de Uso</a>
-        <a href="#" class="drawer-item" id="menuSuporte">💬 Suporte WhatsApp</a>
-    </aside>
+    <main class="main-container">
 
-    <main class="app-body">
-
-        <section class="card hero-card">
-            <div class="image-wrapper">
-                <img src="https://i.postimg.cc/mD82yC4S/moto.jpg" alt="Foto da Moto" class="hero-img">
-                <span class="status-badge">🔥 SORTEIO ATIVO</span>
+        <!-- Banner & Info da Rifa -->
+        <section class="card-rifa">
+            <div class="banner-container">
+                <img src="https://i.postimg.cc/mD82yC4S/moto.jpg" alt="Foto da Moto" class="banner-img">
+                <span class="tag-status">🔴 ADQUIRA JÁ</span>
             </div>
-            <div class="hero-info">
-                <h1>Sorteio Moto Oficial</h1>
-                <p class="hero-desc">Participe agora mesmo! Apenas <strong>R$ 2,99</strong> por cota com confirmação rápida via PIX.</p>
-                <div class="price-chip">
-                    <span class="chip-label">Valor da cota</span>
-                    <span class="chip-value">R$ 2,99</span>
+            <div class="rifa-content">
+                <h1 class="rifa-title">MOTO ZERO KM / PREPARADA</h1>
+                <p class="rifa-subtitle">Sorteio realizado com base na Loteria Federal. Entrega para todo o Brasil!</p>
+
+                <!-- Barra de Progresso de Vendas -->
+                <div class="progress-box">
+                    <div class="progress-header">
+                        <span>Progresso do Sorteio</span>
+                        <span>78% Vendido</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                </div>
+
+                <div class="price-tag-rds">
+                    <span>POR APENAS</span>
+                    <strong>R$ 2,99</strong>
                 </div>
             </div>
         </section>
 
-        <section class="card">
-            <div class="section-header">
-                <h2>⚡ Selecione suas Cotas</h2>
+        <!-- Cotas Premiadas estilo RDS -->
+        <section class="cotas-premiadas-card">
+            <div class="section-title">
+                🎁 COTAS PREMIADAS (PIX NA HORA)
             </div>
-
-            <div class="cotas-grid">
-                <button class="cota-tile" data-qtd="5">
-                    <span class="tile-qty">+5</span>
-                    <span class="tile-label">Cotas</span>
-                    <span class="tile-price">R$ 14,95</span>
-                </button>
-                <button class="cota-tile active" data-qtd="10">
-                    <span class="popular-badge">MAIS POPULAR</span>
-                    <span class="tile-qty">+10</span>
-                    <span class="tile-label">Cotas</span>
-                    <span class="tile-price">R$ 29,90</span>
-                </button>
-                <button class="cota-tile" data-qtd="50">
-                    <span class="tile-qty">+50</span>
-                    <span class="tile-label">Cotas</span>
-                    <span class="tile-price">R$ 149,50</span>
-                </button>
-                <button class="cota-tile" data-qtd="100">
-                    <span class="tile-qty">+100</span>
-                    <span class="tile-label">Cotas</span>
-                    <span class="tile-price">R$ 299,00</span>
-                </button>
-            </div>
-
-            <div class="custom-qty-wrapper">
-                <span style="font-size:0.82rem; color:var(--text-muted)">Quantidade personalizada:</span>
-                <div class="qty-stepper">
-                    <button class="step-btn" id="btnMinus">-</button>
-                    <input type="number" id="qtdManual" value="10" min="1">
-                    <button class="step-btn" id="btnPlus">+</button>
-                </div>
+            <div class="cotas-badges">
+                <div class="badge-numero">🏆 001122 - R$ 500</div>
+                <div class="badge-numero">🏆 003344 - R$ 500</div>
+                <div class="badge-numero">🏆 005566 - R$ 500</div>
             </div>
         </section>
 
-        <section class="card" id="secaoCheckout">
-            <div class="section-header">
-                <h2>👤 Dados para Reserva</h2>
+        <!-- Grade Rápida de Cotas -->
+        <section class="selecao-cotas-card">
+            <div class="section-title">
+                ⚡ SELECIONE A QUANTIDADE
             </div>
-            <form id="formCheckout" class="checkout-form">
-                <div class="input-field">
-                    <label>CPF para guardar seus bilhetes</label>
-                    <div class="input-with-icon">
-                        <input type="text" id="cpfInput" placeholder="000.000.000-00" required maxlength="14">
-                    </div>
+
+            <div class="grid-rapida">
+                <button class="btn-cota-rds" data-qtd="5">
+                    <span class="qtd">+5</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 14,95</span>
+                </button>
+                <button class="btn-cota-rds active" data-qtd="10">
+                    <span class="pop-tag">MAIS VENDIDO</span>
+                    <span class="qtd">+10</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 29,90</span>
+                </button>
+                <button class="btn-cota-rds" data-qtd="50">
+                    <span class="qtd">+50</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 149,50</span>
+                </button>
+                <button class="btn-cota-rds" data-qtd="100">
+                    <span class="qtd">+100</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 299,00</span>
+                </button>
+            </div>
+
+            <div class="stepper-rds">
+                <button id="btnLess">-</button>
+                <input type="number" id="qtdInput" value="10" min="1">
+                <button id="btnMore">+</button>
+            </div>
+        </section>
+
+        <!-- Dados e Pagamento -->
+        <section class="checkout-card-rds" id="checkoutSection">
+            <div class="section-title">
+                👤 DADOS DO PARTICIPANTE
+            </div>
+
+            <form id="rdsForm">
+                <div class="field-box">
+                    <label>DIGITE SEU CPF PARA PARTICIPAR:</label>
+                    <input type="text" id="cpfField" placeholder="000.000.000-00" required maxlength="14">
                 </div>
 
-                <div class="summary-box">
-                    <div class="summary-row">
-                        <span>Cotas escolhidas:</span>
-                        <strong id="summaryQtd">10 cotas</strong>
-                    </div>
-                    <div class="summary-row total-row">
-                        <span>Total:</span>
-                        <strong id="valorTotal" class="price-green">R$ 29,90</strong>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-checkout">GERAR PIX AGORA ⚡</button>
+                <button type="submit" class="btn-comprar-green">
+                    PAGAR COM PIX AGORA ⚡
+                </button>
             </form>
         </section>
 
     </main>
 
-    <div class="bottom-dock">
+    <!-- Barra Inferior Fixa -->
+    <div class="bottom-bar-rds">
         <div>
-            <span style="font-size:0.75rem; color:var(--text-muted)">Total</span><br>
-            <span class="dock-price" id="dockTotal">R$ 29,90</span>
+            <span style="font-size:0.7rem; color:var(--text-sub);">TOTAL:</span><br>
+            <span class="dock-val" id="dockVal">R$ 29,90</span>
         </div>
-        <button class="dock-btn" id="btnDockPagar">PARTICIPAR</button>
+        <button class="dock-btn-rds" id="btnDockPagar">PARTICIPAR ⚡</button>
     </div>
 
-    <!-- Modal Pix -->
-    <div class="modal-backdrop" id="modalPix">
-        <div class="modal-sheet">
-            <button class="sheet-close" id="closePix">&times;</button>
-            <h3>Pagamento PIX Gerado ⚡</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin:10px 0;">Copie a chave abaixo para pagar no app do seu banco:</p>
-            <input type="text" id="inputPixCode" readonly value="00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-42661417400052040000530398654029.90" style="width:100%; padding:10px; background:#0f172a; border:1px solid var(--card-border); color:#fff; border-radius:8px;">
-            <button id="btnCopiarPix" class="btn-checkout" style="margin-top:12px;">Copiar Código PIX</button>
+    <!-- Modal PIX -->
+    <div class="modal-bg" id="modalPix">
+        <div class="modal-body">
+            <button class="modal-close" id="closePix">✕</button>
+            <h3 style="color:var(--primary-yellow); font-weight:900;">PAGAMENTO PIX ⚡</h3>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 14px 0;">Copie a chave abaixo e cole no seu aplicativo bancário:</p>
+            <input type="text" id="pixCode" readonly value="00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-42661417400052040000530398654029.90" style="width:100%; padding:12px; background:#080a0e; border:1px solid var(--border-color); color:#fff; border-radius:8px; font-weight:700;">
+            <button id="btnCopiar" class="btn-comprar-green">COPIAR CHAVE PIX</button>
+        </div>
+    </div>
+
+    <!-- Modal Consultar Números -->
+    <div class="modal-bg" id="modalConsulta">
+        <div class="modal-body">
+            <button class="modal-close" id="closeConsulta">✕</button>
+            <h3 style="color:var(--primary-yellow); font-weight:900;">CONSULTAR MEUS NÚMEROS</h3>
+            <div class="field-box" style="margin-top:12px;">
+                <label>DIGITE SEU CPF:</label>
+                <input type="text" id="cpfSearch" placeholder="000.000.000-00">
+            </div>
+            <button class="btn-comprar-green" style="margin-top:12px;">BUSCAR BILHETES</button>
         </div>
     </div>
 
     <script>
-        const PRECO_COTA = 2.99;
-        let quantidade = 10;
+        const PRECO = 2.99;
+        let qtd = 10;
 
-        const qtdManual = document.getElementById('qtdManual');
-        const valorTotalEl = document.getElementById('valorTotal');
-        const dockTotalEl = document.getElementById('dockTotal');
-        const summaryQtdEl = document.getElementById('summaryQtd');
-        const tiles = document.querySelectorAll('.cota-tile');
+        const qtdInput = document.getElementById('qtdInput');
+        const dockVal = document.getElementById('dockVal');
+        const buttons = document.querySelectorAll('.btn-cota-rds');
 
-        function atualizar(v) {
-            quantidade = parseInt(v) || 1;
-            if(quantidade < 1) quantidade = 1;
-            qtdManual.value = quantidade;
-            summaryQtdEl.textContent = `${quantidade} cota${quantidade > 1 ? 's' : ''}`;
-            const total = (quantidade * PRECO_COTA).toFixed(2).replace('.', ',');
-            valorTotalEl.textContent = `R$ ${total}`;
-            dockTotalEl.textContent = `R$ ${total}`;
+        function update(val) {
+            qtd = parseInt(val) || 1;
+            if (qtd < 1) qtd = 1;
+            qtdInput.value = qtd;
+            const total = (qtd * PRECO).toFixed(2).replace('.', ',');
+            dockVal.textContent = `R$ ${total}`;
         }
 
-        tiles.forEach(t => {
-            t.addEventListener('click', () => {
-                tiles.forEach(x => x.classList.remove('active'));
-                t.classList.add('active');
-                atualizar(t.getAttribute('data-qtd'));
-            });
+        buttons.forEach(b => {
+            b.onclick = () => {
+                buttons.forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                update(b.getAttribute('data-qtd'));
+            };
         });
 
-        document.getElementById('btnMinus').onclick = () => { tiles.forEach(x => x.classList.remove('active')); atualizar(quantidade - 1); };
-        document.getElementById('btnPlus').onclick = () => { tiles.forEach(x => x.classList.remove('active')); atualizar(quantidade + 1); };
-        qtdManual.oninput = (e) => { tiles.forEach(x => x.classList.remove('active')); atualizar(e.target.value); };
+        document.getElementById('btnLess').onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd - 1); };
+        document.getElementById('btnMore').onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd + 1); };
+        qtdInput.oninput = (e) => { buttons.forEach(x => x.classList.remove('active')); update(e.target.value); };
 
-        document.getElementById('openMenu').onclick = () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('overlay').classList.add('active'); };
-        document.getElementById('closeMenu').onclick = () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); };
-        document.getElementById('overlay').onclick = () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); };
+        document.getElementById('btnMeusNumeros').onclick = () => document.getElementById('modalConsulta').classList.add('active');
+        document.getElementById('closeConsulta').onclick = () => document.getElementById('modalConsulta').classList.remove('active');
 
-        document.getElementById('formCheckout').onsubmit = (e) => {
+        document.getElementById('rdsForm').onsubmit = (e) => {
             e.preventDefault();
             document.getElementById('modalPix').classList.add('active');
         };
 
         document.getElementById('closePix').onclick = () => document.getElementById('modalPix').classList.remove('active');
-        document.getElementById('btnCopiarPix').onclick = () => {
-            navigator.clipboard.writeText(document.getElementById('inputPixCode').value);
-            alert("Código PIX copiado!");
+        document.getElementById('btnCopiar').onclick = () => {
+            navigator.clipboard.writeText(document.getElementById('pixCode').value);
+            alert('Chave PIX copiada!');
         };
-        document.getElementById('btnDockPagar').onclick = () => document.getElementById('secaoCheckout').scrollIntoView({behavior:'smooth'});
+
+        document.getElementById('btnDockPagar').onclick = () => {
+            document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
+        };
     </script>
 </body>
 </html>
