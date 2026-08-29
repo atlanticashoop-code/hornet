@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const { cpf, valor, qtd } = req.body;
     const cpfLimpo = String(cpf || '').replace(/\D/g, '');
 
-    // Gera um código único de idempotência para cada tentativa de pagamento
+    // Gera uma chave de idempotência única para cada requisição
     const idempotencyKey = `pix-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     try {
@@ -46,7 +46,13 @@ export default async function handler(req, res) {
             });
         }
 
-        return res.status(200).json(data);
+        // Retorna o código BR Code do Pix (Pix Copia e Cola) e a imagem em Base64
+        return res.status(200).json({
+            id: data.id,
+            qr_code: data.point_of_interaction.transaction_data.qr_code,
+            qr_code_base64: data.point_of_interaction.transaction_data.qr_code_base64
+        });
+
     } catch (error) {
         return res.status(500).json({ message: 'Erro interno no servidor da Vercel.' });
     }
