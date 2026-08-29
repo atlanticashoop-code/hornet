@@ -7,9 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- SDK OFICIAL MERCADO PAGO -->
-    <script src="https://sdk.mercadopago.com/js/v2"></script>
 
     <style>
         :root {
@@ -827,9 +824,6 @@
     </div>
 
     <script>
-        // COLOQUE SEU ACCESS TOKEN DO MERCADO PAGO AQUI:
-        const MERCADO_PAGO_TOKEN = 'TEST-3786384884682238-082801-1e6446e548d1ac2b67c973d6720bfb07-245889948'; 
-
         const PRECO = 2.99;
         let qtd = 10;
 
@@ -931,7 +925,7 @@
             document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
         };
 
-        /* INTEGRAÇÃO MERCADO PAGO VIA PIX COM TRATAMENTO DE RETORNO */
+        /* PASSO 2: CHAMADA PARA A ROTA SERVERLESS DA VERCEL (/api/pix) */
         document.getElementById('rdsForm').onsubmit = async (e) => {
             e.preventDefault();
             
@@ -943,24 +937,10 @@
             btnSubmit.disabled = true;
 
             try {
-                const response = await fetch('https://api.mercadopago.com/v1/payments', {
+                const response = await fetch('/api/pix', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${MERCADO_PAGO_TOKEN}`
-                    },
-                    body: JSON.stringify({
-                        transaction_amount: totalValor,
-                        description: `Cotas Hornetão Blue - Qtd: ${qtd}`,
-                        payment_method_id: 'pix',
-                        payer: {
-                            email: `cliente${Date.now()}@gmail.com`,
-                            identification: {
-                                type: 'CPF',
-                                number: cpf
-                            }
-                        }
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cpf, valor: totalValor, qtd })
                 });
 
                 const data = await response.json();
@@ -974,12 +954,11 @@
                     
                     modalPix.classList.add('active');
                 } else {
-                    alert('Erro ao gerar PIX: ' + (data.message || 'Verifique se o CPF é válido.'));
-                    console.log('Detalhes:', data);
+                    alert('Erro Mercado Pago: ' + (data.message || 'Verifique o CPF informado.'));
+                    console.log('Detalhes do erro:', data);
                 }
             } catch (error) {
-                console.error('Erro de requisição:', error);
-                alert('Erro ao comunicar com a API do Mercado Pago.');
+                alert('Erro ao conectar ao servidor de pagamento.');
             } finally {
                 btnSubmit.innerText = 'PAGAR COM PIX AGORA 🍀';
                 btnSubmit.disabled = false;
