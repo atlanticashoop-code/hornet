@@ -15,6 +15,7 @@
             --border-color: #232d3f;
             --primary-yellow: #ffc107;
             --primary-green: #00e676;
+            --neon-green: #39ff14;
             --text-main: #ffffff;
             --text-sub: #a0aec0;
             --radius-main: 14px;
@@ -38,7 +39,7 @@
             align-items: center;
         }
 
-        /* TOPO COM MENU HAMBÚRGUER */
+        /* TOPO COM MENU NA DIREITA E TREVO */
         .rds-header {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -55,24 +56,35 @@
         .header-left {
             display: flex;
             align-items: center;
+            gap: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
             gap: 12px;
+        }
+
+        /* ESTILO MAIS CHAMATIVO PARA O NOME */
+        .brand-logo {
+            font-weight: 900;
+            font-size: 1.15rem;
+            color: var(--neon-green);
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .menu-btn-hamburger {
             background: transparent;
             border: none;
             color: var(--primary-yellow);
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-        }
-
-        .brand-logo {
-            font-weight: 900;
-            font-size: 1.1rem;
-            color: var(--primary-yellow);
-            letter-spacing: -0.5px;
         }
 
         .btn-meus-numeros {
@@ -86,7 +98,7 @@
             cursor: pointer;
         }
 
-        /* MENU GAVETA LATERAL */
+        /* MENU GAVETA LATERAL (ABRE DA DIREITA) */
         .drawer-overlay {
             position: fixed;
             inset: 0;
@@ -105,20 +117,20 @@
         .drawer-menu {
             position: fixed;
             top: 0;
-            left: -280px;
+            right: -280px;
             width: 280px;
             height: 100%;
             background: #0d1117;
-            border-right: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
             z-index: 201;
-            transition: left 0.3s ease;
+            transition: right 0.3s ease;
             padding: 20px;
             display: flex;
             flex-direction: column;
         }
 
         .drawer-menu.active {
-            left: 0;
+            right: 0;
         }
 
         .drawer-header {
@@ -530,16 +542,18 @@
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
+    <!-- BARRA SUPERIOR (COM MENU NA DIREITA E NOVO ESTILO) -->
     <header class="rds-header">
         <div class="header-left">
-            <button class="menu-btn-hamburger" id="openDrawer">☰</button>
-            <div class="brand-logo">⚡ RDS PRÊMIOS</div>
+            <div class="brand-logo">🍀 RDS PRÊMIOS</div>
         </div>
-        <button class="btn-meus-numeros" id="btnMeusNumeros">🔍 MEUS BILHETES</button>
+        <div class="header-right">
+            <button class="btn-meus-numeros" id="btnMeusNumeros">🔍 BILHETES</button>
+            <button class="menu-btn-hamburger" id="openDrawer">☰</button>
+        </div>
     </header>
 
-    <!-- MENU GAVETA LATERAL -->
+    <!-- MENU GAVETA LATERAL (AGORA NA DIREITA) -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
     <nav class="drawer-menu" id="drawerMenu">
         <div class="drawer-header">
@@ -564,7 +578,7 @@
             </div>
             <div class="rifa-content">
                 <h1 class="rifa-title">MOTO ZERO KM / PREPARADA</h1>
-                <p class="rifa-subtitle">Sorteio realizado com base na Loteria Federal. Entrega para todo o Brasil!</p>
+                <p class="rifa-subtitle">Sorteio realizado com base na Loteria Federal. Entrega e transferência inclusas!</p>
 
                 <div class="progress-box">
                     <div class="progress-header">
@@ -595,7 +609,7 @@
 
         <!-- SELEÇÃO DE COTAS -->
         <section class="selecao-cotas-card">
-            <div class="section-title">⚡ SELECIONE A QUANTIDADE</div>
+            <div class="section-title">🍀 SELECIONE A QUANTIDADE</div>
 
             <div class="grid-rapida">
                 <button class="btn-cota-rds" data-qtd="5">
@@ -638,7 +652,7 @@
                     <input type="text" id="cpfField" placeholder="000.000.000-00" required maxlength="14">
                 </div>
 
-                <button type="submit" class="btn-comprar-green">PAGAR COM PIX AGORA ⚡</button>
+                <button type="submit" class="btn-comprar-green">PAGAR COM PIX AGORA 🍀</button>
             </form>
         </section>
 
@@ -671,7 +685,7 @@
             <span style="font-size:0.7rem; color:var(--text-sub);">TOTAL:</span><br>
             <span class="dock-val" id="dockVal">R$ 29,90</span>
         </div>
-        <button class="dock-btn-rds" id="btnDockPagar">PARTICIPAR ⚡</button>
+        <button class="dock-btn-rds" id="btnDockPagar">PARTICIPAR 🍀</button>
     </div>
 
     <!-- MODAL PIX -->
@@ -698,15 +712,16 @@
         </div>
     </div>
 
-    <!-- MODAL REGULAMENTO -->
+    <!-- MODAL REGULAMENTO (ATUALIZADO) -->
     <div class="modal-bg" id="modalRegulamento">
         <div class="modal-body">
             <button class="modal-close" id="closeRegulamento">✕</button>
             <h3 style="color:var(--primary-yellow); font-weight:900;">REGULAMENTO</h3>
             <div class="modal-content-text">
-                <p>1. O sorteio da moto será baseado na extração da Loteria Federal após a venda de 100% das cotas disponiblizadas.</p>
-                <p>2. O contemplado receberá o prêmio no estado em que se encontra, conforme as fotos divulgadas na plataforma.</p>
-                <p>3. As reservas de cotas pendentes de pagamento via PIX expiram após 15 minutos, voltando automaticamente para o sistema.</p>
+                <p>1. O sorteio só acontecerá quando 100% de todas as cotas forem devidamente vendidas e pagas.</p>
+                <p>2. A data oficial do sorteio será informada com antecedência em nossas redes sociais assim que a meta de vendas for atingida, com base nos números extraídos pela Loteria Federal.</p>
+                <p>3. A entrega do veículo e a transferência de documentação para o nome do ganhador ficam totalmente por conta da <strong>RDS PRÊMIOS</strong>, sem nenhum custo adicional de frete ou transferência para o contemplado.</p>
+                <p>4. As reservas de cotas pendentes de pagamento via PIX expiram automaticamente em 15 minutos, sendo disponibilizadas novamente para o sistema.</p>
             </div>
         </div>
     </div>
@@ -718,8 +733,8 @@
             <h3 style="color:var(--primary-yellow); font-weight:900;">TERMOS DE USO</h3>
             <div class="modal-content-text">
                 <p>1. A participação na rifa é estritamente proibida para menores de 18 anos.</p>
-                <p>2. O usuário declara que todas as informações prestadas no momento da compra (CPF e Contato) são verdadeiras.</p>
-                <p>3. O prêmio será entregue em até 5 dias úteis após a validação oficial do sorteio e do participante contemplado.</p>
+                <p>2. O participante declara que todas as informações prestadas no momento da compra (CPF e Contato) são verdadeiras e de sua autoria.</p>
+                <p>3. O prêmio será entregue devidamente transferido ao ganhador em até 5 dias úteis após a validação oficial do resultado e verificação do participante contemplado.</p>
             </div>
         </div>
     </div>
