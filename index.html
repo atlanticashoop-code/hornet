@@ -693,12 +693,12 @@
             <div class="section-title">🍀 SELECIONE A QUANTIDADE</div>
 
             <div class="grid-rapida">
-                <button class="btn-cota-rds" data-qtd="5">
-                    <span class="qtd">+5</span>
+                <button class="btn-cota-rds active" data-qtd="2">
+                    <span class="qtd">+2</span>
                     <span class="lbl">COTAS</span>
-                    <span class="val">R$ 14,95</span>
+                    <span class="val">R$ 5,98</span>
                 </button>
-                <button class="btn-cota-rds active" data-qtd="10">
+                <button class="btn-cota-rds" data-qtd="10">
                     <span class="pop-tag">MAIS VENDIDO</span>
                     <span class="qtd">+10</span>
                     <span class="lbl">COTAS</span>
@@ -718,7 +718,7 @@
 
             <div class="stepper-rds">
                 <button id="btnLess">-</button>
-                <input type="number" id="qtdInput" value="10" min="1">
+                <input type="number" id="qtdInput" value="2" min="1" inputmode="numeric">
                 <button id="btnMore">+</button>
             </div>
         </section>
@@ -730,12 +730,12 @@
             <form id="rdsForm">
                 <div class="field-box">
                     <label>DIGITE SEU CELULAR (WHATSAPP):</label>
-                    <input type="tel" id="phoneField" placeholder="(00) 90000-0000" required maxlength="15">
+                    <input type="tel" id="phoneField" placeholder="(00) 90000-0000" required maxlength="15" inputmode="numeric">
                 </div>
 
                 <div class="field-box">
                     <label>DIGITE SEU CPF PARA PARTICIPAR:</label>
-                    <input type="text" id="cpfField" placeholder="000.000.000-00" required maxlength="14">
+                    <input type="text" id="cpfField" placeholder="000.000.000-00" required maxlength="14" inputmode="numeric">
                 </div>
 
                 <button type="submit" class="btn-comprar-green">PAGAR COM PIX AGORA 🍀</button>
@@ -769,7 +769,7 @@
     <div class="bottom-bar-rds">
         <div>
             <span style="font-size:0.7rem; color:var(--text-sub);">TOTAL:</span><br>
-            <span class="dock-val" id="dockVal">R$ 29,90</span>
+            <span class="dock-val" id="dockVal">R$ 5,98</span>
         </div>
         <button class="dock-btn-rds" id="btnDockPagar">PARTICIPAR 🍀</button>
     </div>
@@ -795,7 +795,7 @@
             <h3 style="color:var(--primary-yellow); font-weight:900;">MEUS BILHETES</h3>
             <div class="field-box" style="margin-top:12px; text-align:left;">
                 <label>DIGITE SEU CPF:</label>
-                <input type="text" id="cpfSearch" placeholder="000.000.000-00">
+                <input type="text" id="cpfSearch" placeholder="000.000.000-00" inputmode="numeric">
             </div>
             <button class="btn-comprar-green" style="margin-top:12px;">BUSCAR BILHETES</button>
         </div>
@@ -830,7 +830,7 @@
 
     <script>
         const PRECO = 2.99;
-        let qtd = 10;
+        let qtd = 2;
 
         const qtdInput = document.getElementById('qtdInput');
         const dockVal = document.getElementById('dockVal');
