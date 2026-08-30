@@ -99,7 +99,7 @@ module.exports = async (req, res) => {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${sb_publishable_lGtzhKr3071NaxYCnMKn5g_hKHidtU7}`,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
