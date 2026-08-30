@@ -1,3 +1,5 @@
+// Arquivo: /api/pix.js
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -44,16 +46,23 @@ module.exports = async (req, res) => {
     const areaCode = cleanPhone.substring(0, 2);
     const phoneNumber = cleanPhone.substring(2);
 
+    // Dados para o Mercado Pago
     const paymentData = {
       transaction_amount: numericAmount,
-      description: `RDS PRÊMIOS - ${qtd || 1} Cota(s) - Tel: ${cleanPhone}`,
+      description: `RDS PRÊMIOS - ${qtd || 1} Cota(s)`,
       payment_method_id: 'pix',
       payer: {
-        email: `cliente_${cleanCpf}@rdspremios.com`,
+        email: `cliente${cleanCpf}@gmail.com`, // Formato de e-mail comum aceito pelo MP
         first_name: 'Cliente',
         last_name: 'RDS',
-        identification: { type: 'CPF', number: cleanCpf },
-        phone: { area_code: areaCode, number: phoneNumber }
+        identification: {
+          type: 'CPF',
+          number: cleanCpf
+        },
+        phone: {
+          area_code: areaCode,
+          number: phoneNumber
+        }
       }
     };
 
@@ -61,7 +70,7 @@ module.exports = async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${token.trim()}`,
         'X-Idempotency-Key': `pix-${cleanCpf}-${Date.now()}`
       },
       body: JSON.stringify(paymentData)
@@ -70,8 +79,9 @@ module.exports = async (req, res) => {
     const data = await mpResponse.json();
 
     if (!mpResponse.ok) {
+      console.error('Erro Mercado Pago:', data);
       return res.status(mpResponse.status).json({
-        message: data.message || 'Erro ao gerar cobrança no Mercado Pago.',
+        message: data.message || (data.cause && data.cause[0] ? data.cause[0].description : 'Erro ao gerar cobrança no Mercado Pago.'),
         details: data
       });
     }
@@ -93,25 +103,29 @@ module.exports = async (req, res) => {
 
     // --- SALVAR NO SUPABASE ---
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
-    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI'; // <--- COLE SUA CHAVE ANON AQUI
+    const SUPABASE_ANON_KEY = 'sb_publishable_lGtzhKr3071NaxYCnMKn5g_hKHidtU7'; // <--- COLE SUA CHAVE ANON AQUI
 
-    await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${sb_publishable_lGtzhKr3071NaxYCnMKn5g_hKHidtU7}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        cpf: cleanCpf,
-        telefone: cleanPhone,
-        qtd: totalCotas,
-        numeros: numerosGerados,
-        valor: numericAmount,
-        status: 'pendente'
-      })
-    });
+    try {
+      await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          cpf: cleanCpf,
+          telefone: cleanPhone,
+          qtd: totalCotas,
+          numeros: numerosGerados,
+          valor: numericAmount,
+          status: 'pendente'
+        })
+      });
+    } catch (dbErr) {
+      console.error('Erro ao salvar no banco:', dbErr);
+    }
 
     return res.status(200).json({
       id: data.id,
