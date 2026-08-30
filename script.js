@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function update(val) {
         qtd = parseInt(val) || 1;
         if (qtd < 1) qtd = 1;
-        qtdInput.value = qtd;
+        if (qtdInput) qtdInput.value = qtd;
         const total = (qtd * PRECO).toFixed(2).replace('.', ',');
-        dockVal.textContent = `R$ ${total}`;
+        if (dockVal) dockVal.textContent = `R$ ${total}`;
     }
 
     // Clique nos botões de cota rápida (+5, +10, +50, +100)
@@ -87,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) modal.classList.add('active');
     }
 
-    // Eventos dos botões para abrir modais
     const btnMeusNumeros = document.getElementById('btnMeusNumeros');
     const navMeusBilhetes = document.getElementById('navMeusBilhetes');
     const closeConsulta = document.getElementById('closeConsulta');
@@ -118,16 +117,18 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Modal Pix e Copiar Chave
+    /* COPIAR CÓDIGO PIX COPIA E COLA */
     const closePix = document.getElementById('closePix');
     const btnCopiar = document.getElementById('btnCopiar');
     if (closePix) closePix.onclick = () => modalPix.classList.remove('active');
     if (btnCopiar) {
         btnCopiar.onclick = () => {
             const pixInput = document.getElementById('pixCode');
-            pixInput.select();
-            navigator.clipboard.writeText(pixInput.value);
-            alert('Chave PIX copiada!');
+            if (pixInput) {
+                pixInput.select();
+                navigator.clipboard.writeText(pixInput.value);
+                alert('Código Pix Copia e Cola copiado com sucesso!');
+            }
         };
     }
 
@@ -138,6 +139,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkoutSection = document.getElementById('checkoutSection');
             if (checkoutSection) checkoutSection.scrollIntoView({ behavior: 'smooth' });
         };
+    }
+
+    /* MÁSCARA AUTOMÁTICA DE CELULAR */
+    const phoneField = document.getElementById('phoneField');
+    if (phoneField) {
+        phoneField.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, "");
+            v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+            v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+            e.target.value = v;
+        });
     }
 
     /* MÁSCARA AUTOMÁTICA DE CPF */
@@ -152,16 +164,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* SUBMISSÃO DO FORMULÁRIO / CHAMADA DA API NA VERCEL */
+    /* SUBMISSÃO DO FORMULÁRIO / PIX COPIA E COLA */
     const rdsForm = document.getElementById('rdsForm');
     if (rdsForm) {
         rdsForm.onsubmit = async (e) => {
             e.preventDefault();
             
-            const cpf = document.getElementById('cpfField').value.replace(/\D/g, '');
+            const cpf = document.getElementById('cpfField') ? document.getElementById('cpfField').value.replace(/\D/g, '') : '';
+            const telefone = document.getElementById('phoneField') ? document.getElementById('phoneField').value.replace(/\D/g, '') : '';
             const totalValor = parseFloat((qtd * PRECO).toFixed(2));
             const btnSubmit = rdsForm.querySelector('.btn-comprar-green');
             
+            if (telefone.length < 10) {
+                alert('Por favor, informe um número de celular válido com DDD.');
+                return;
+            }
+
             if (cpf.length !== 11) {
                 alert('Por favor, informe um CPF válido.');
                 return;
@@ -174,22 +192,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/pix', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cpf, valor: totalValor, qtd })
+                    body: JSON.stringify({ cpf, telefone, valor: totalValor, qtd })
                 });
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    const pixCopiaECola = data.qr_code || data.point_of_interaction?.transaction_data?.qr_code;
-                    const qrCodeBase64 = data.qr_code_base64 || data.point_of_interaction?.transaction_data?.qr_code_base64;
+                if (response.ok && data.qr_code) {
+                    const pixInput = document.getElementById('pixCode');
+                    if (pixInput) pixInput.value = data.qr_code;
+                    
+                    if (modalPix) modalPix.classList.add('active');
 
-                    if (pixCopiaECola && qrCodeBase64) {
-                        document.getElementById('pixCode').value = pixCopiaECola;
-                        document.getElementById('qrCodeImg').src = `data:image/png;base64,${qrCodeBase64}`;
-                        modalPix.classList.add('active');
-                    } else {
-                        alert('Erro ao carregar chave do Pix. Tente novamente.');
-                    }
+                    navigator.clipboard.writeText(data.qr_code).then(() => {
+                        alert('Código Pix Copia e Cola gerado e copiado automaticamente!');
+                    }).catch(() => {
+                        alert('Código Pix Copia e Cola gerado! Clique no botão para copiar.');
+                    });
+
                 } else {
                     alert('Erro Mercado Pago: ' + (data.message || 'Verifique os dados informados.'));
                     console.error('Detalhes do erro:', data);
