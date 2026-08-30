@@ -1,8 +1,5 @@
-// Arquivo: /api/pix.js
-
-export default async function handler(req, res) {
-  // Configuração dos cabeçalhos CORS para permitir chamadas do front-end
-  res.setHeader('Access-Control-Allow-Credentials', true);
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
@@ -10,51 +7,43 @@ export default async function handler(req, res) {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
 
-  // Tratamento para requisições do tipo OPTIONS (preflight CORS)
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
-  // Permite apenas requisições POST
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método não permitido. Utilize POST.' });
+    return res.status(405).json({ message: 'Método não permitido.' });
   }
 
   try {
-    const { telefone, cpf, valor, qtd } = req.body;
+    const { telefone, cpf, valor, qtd } = req.body || {};
 
-    // Limpa as strings mantendo apenas dígitos
-    const cleanPhone = telefone ? telefone.replace(/\D/g, '') : '';
-    const cleanCpf = cpf ? cpf.replace(/\D/g, '') : '';
+    const cleanPhone = telefone ? String(telefone).replace(/\D/g, '') : '';
+    const cleanCpf = cpf ? String(cpf).replace(/\D/g, '') : '';
 
     if (!cleanPhone || cleanPhone.length < 10) {
-      return res.status(400).json({ message: 'Celular inválido. Envie um número com DDD.' });
+      return res.status(400).json({ message: 'Celular inválido.' });
     }
 
     if (!cleanCpf || cleanCpf.length !== 11) {
-      return res.status(400).json({ message: 'CPF inválido. Envie um CPF com 11 dígitos.' });
+      return res.status(400).json({ message: 'CPF inválido.' });
     }
 
     const numericAmount = Number(valor);
     if (!numericAmount || numericAmount <= 0) {
-      return res.status(400).json({ message: 'Valor inválido para a transação.' });
+      return res.status(400).json({ message: 'Valor inválido.' });
     }
 
-    // Busca o Token de Acesso configurado no painel da Vercel
     const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
-
     if (!token) {
       return res.status(500).json({
-        message: 'MERCADO_PAGO_ACCESS_TOKEN não está configurado nas variáveis de ambiente da Vercel.'
+        message: 'MERCADO_PAGO_ACCESS_TOKEN não está configurado na Vercel.'
       });
     }
 
-    // Extrai o DDD e o número do telefone
     const areaCode = cleanPhone.substring(0, 2);
     const phoneNumber = cleanPhone.substring(2);
 
-    // Payload de criação do pagamento conforme especificações do Mercado Pago
     const paymentData = {
       transaction_amount: numericAmount,
       description: `RDS PRÊMIOS - ${qtd || 1} Cota(s) - Tel: ${cleanPhone}`,
@@ -63,18 +52,11 @@ export default async function handler(req, res) {
         email: `cliente_${cleanCpf}@rdspremios.com`,
         first_name: 'Cliente',
         last_name: 'RDS',
-        identification: {
-          type: 'CPF',
-          number: cleanCpf
-        },
-        phone: {
-          area_code: areaCode,
-          number: phoneNumber
-        }
+        identification: { type: 'CPF', number: cleanCpf },
+        phone: { area_code: areaCode, number: phoneNumber }
       }
     };
 
-    // Chamada à API de pagamentos do Mercado Pago
     const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
@@ -88,34 +70,59 @@ export default async function handler(req, res) {
     const data = await mpResponse.json();
 
     if (!mpResponse.ok) {
-      console.error('Erro retornado pela API do Mercado Pago:', data);
       return res.status(mpResponse.status).json({
-        message: data.message || 'Erro ao gerar cobrança PIX no Mercado Pago.',
-        details: data.cause || data
-      });
-    }
-
-    // Extrai o código "Copia e Cola" e a imagem base64 do QR Code
-    const qrCode = data.point_of_interaction?.transaction_data?.qr_code;
-    const qrCodeBase64 = data.point_of_interaction?.transaction_data?.qr_code_base64;
-
-    if (!qrCode) {
-      return res.status(500).json({
-        message: 'A resposta do Mercado Pago não retornou o código Pix.',
+        message: data.message || 'Erro ao gerar cobrança no Mercado Pago.',
         details: data
       });
     }
 
-    // Retorno de sucesso para o front-end
+    const qrCode = data.point_of_interaction?.transaction_data?.qr_code;
+    const qrCodeBase64 = data.point_of_interaction?.transaction_data?.qr_code_base64;
+
+    if (!qrCode) {
+      return res.status(500).json({ message: 'Pix não retornado do Mercado Pago.' });
+    }
+
+    // --- GERAR NÚMEROS DE COTAS ALEATÓRIAS ---
+    const totalCotas = Number(qtd) || 1;
+    const numerosGerados = [];
+    for (let i = 0; i < totalCotas; i++) {
+      const num = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+      numerosGerados.push(num);
+    }
+
+    // --- SALVAR NO SUPABASE ---
+    const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
+    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI'; // <--- COLE SUA CHAVE ANON AQUI
+
+    await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        cpf: cleanCpf,
+        telefone: cleanPhone,
+        qtd: totalCotas,
+        numeros: numerosGerados,
+        valor: numericAmount,
+        status: 'pendente'
+      })
+    });
+
     return res.status(200).json({
       id: data.id,
       status: data.status,
       qr_code: qrCode,
-      qr_code_base64: qrCodeBase64
+      qr_code_base64: qrCodeBase64,
+      numeros: numerosGerados
     });
 
   } catch (error) {
-    console.error('Erro interno no servidor (/api/pix.js):', error);
-    return res.status(500).json({ message: 'Erro interno ao processar a requisição.' });
+    console.error('Erro no servidor (/api/pix.js):', error);
+    return res.status(500).json({ message: 'Erro interno ao processar requisição.' });
   }
-}
+};
