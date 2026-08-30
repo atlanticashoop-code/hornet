@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     
     // ATENÇÃO: Substitua pelo valor da sua chave anon public (eyJhbGciOi...)
-    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI'; 
+    const SUPABASE_ANON_KEY = 'sb_publishable_lGtzhKr3071NaxYCnMKn5g_hKHidtU7'; 
 
     // Busca os bilhetes cadastrados para este CPF
     const fetchResponse = await fetch(`${SUPABASE_REST_URL}/bilhetes?cpf=eq.${cpf}&select=*`, {
