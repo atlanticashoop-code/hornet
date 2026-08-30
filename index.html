@@ -795,9 +795,9 @@
             <h3 style="color:var(--primary-yellow); font-weight:900;">MEUS BILHETES</h3>
             <div class="field-box" style="margin-top:12px; text-align:left;">
                 <label>DIGITE SEU CPF:</label>
-                <input type="text" id="cpfSearch" placeholder="000.000.000-00" inputmode="numeric">
+                <input type="text" id="cpfSearch" placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
             </div>
-            <button class="btn-comprar-green" style="margin-top:12px;">BUSCAR BILHETES</button>
+            <button class="btn-comprar-green" id="btnBuscarBilhetes" style="margin-top:12px;">BUSCAR BILHETES</button>
         </div>
     </div>
 
@@ -941,13 +941,60 @@
         });
 
         /* MÁSCARA CPF AUTOMÁTICA */
-        document.getElementById('cpfField').addEventListener('input', function(e) {
-            let v = e.target.value.replace(/\D/g, "");
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-            e.target.value = v;
-        });
+        function applyCpfMask(input) {
+            input.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, "");
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                e.target.value = v;
+            });
+        }
+        applyCpfMask(document.getElementById('cpfField'));
+        applyCpfMask(document.getElementById('cpfSearch'));
+
+        /* CONSULTA DE BILHETES POR CPF */
+        const btnBuscar = document.getElementById('btnBuscarBilhetes');
+        const cpfSearchInput = document.getElementById('cpfSearch');
+
+        btnBuscar.onclick = async () => {
+            const cpf = cpfSearchInput.value.replace(/\D/g, '');
+
+            if (cpf.length !== 11) {
+                alert('Por favor, digite um CPF válido com 11 dígitos.');
+                return;
+            }
+
+            btnBuscar.innerText = 'BUSCANDO...';
+            btnBuscar.disabled = true;
+
+            try {
+                const response = await fetch('/api/meus-bilhetes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cpf })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.compras && data.compras.length > 0) {
+                    let resultado = '📋 SEUS BILHETES ENCONTRADOS:\n\n';
+                    data.compras.forEach((compra, index) => {
+                        const nums = Array.isArray(compra.numeros) ? compra.numeros.join(', ') : compra.numeros;
+                        const status = compra.status ? compra.status.toUpperCase() : 'PENDENTE';
+                        resultado += `Compra ${index + 1} [${status}]:\nCotas: ${nums}\n\n`;
+                    });
+                    alert(resultado);
+                } else {
+                    alert('Nenhum bilhete encontrado para este CPF.');
+                }
+            } catch (err) {
+                alert('Erro ao consultar bilhetes. Tente novamente.');
+            } finally {
+                btnBuscar.innerText = 'BUSCAR BILHETES';
+                btnBuscar.disabled = false;
+            }
+        };
 
         /* CONEXÃO COM A ROTA /api/pix NA VERCEL */
         document.getElementById('rdsForm').onsubmit = async (e) => {
