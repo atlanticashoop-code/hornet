@@ -22,10 +22,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { cpf, valor, qtd } = req.body;
+    const { telefone, cpf, valor, qtd } = req.body;
 
-    // Limpa a string do CPF mantendo apenas dígitos
+    // Limpa as strings mantendo apenas dígitos
+    const cleanPhone = telefone ? telefone.replace(/\D/g, '') : '';
     const cleanCpf = cpf ? cpf.replace(/\D/g, '') : '';
+
+    if (!cleanPhone || cleanPhone.length < 10) {
+      return res.status(400).json({ message: 'Celular inválido. Envie um número com DDD.' });
+    }
 
     if (!cleanCpf || cleanCpf.length !== 11) {
       return res.status(400).json({ message: 'CPF inválido. Envie um CPF com 11 dígitos.' });
@@ -45,10 +50,14 @@ export default async function handler(req, res) {
       });
     }
 
+    // Extrai o DDD e o número do telefone
+    const areaCode = cleanPhone.substring(0, 2);
+    const phoneNumber = cleanPhone.substring(2);
+
     // Payload de criação do pagamento conforme especificações do Mercado Pago
     const paymentData = {
       transaction_amount: numericAmount,
-      description: `RDS PRÊMIOS - ${qtd || 1} Cota(s)`,
+      description: `RDS PRÊMIOS - ${qtd || 1} Cota(s) - Tel: ${cleanPhone}`,
       payment_method_id: 'pix',
       payer: {
         email: `cliente_${cleanCpf}@rdspremios.com`,
@@ -57,6 +66,10 @@ export default async function handler(req, res) {
         identification: {
           type: 'CPF',
           number: cleanCpf
+        },
+        phone: {
+          area_code: areaCode,
+          number: phoneNumber
         }
       }
     };
