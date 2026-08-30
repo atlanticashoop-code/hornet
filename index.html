@@ -729,6 +729,11 @@
 
             <form id="rdsForm">
                 <div class="field-box">
+                    <label>DIGITE SEU CELULAR (WHATSAPP):</label>
+                    <input type="tel" id="phoneField" placeholder="(00) 90000-0000" required maxlength="15">
+                </div>
+
+                <div class="field-box">
                     <label>DIGITE SEU CPF PARA PARTICIPAR:</label>
                     <input type="text" id="cpfField" placeholder="000.000.000-00" required maxlength="14">
                 </div>
@@ -927,6 +932,14 @@
             document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
         };
 
+        /* MÁSCARA CELULAR AUTOMÁTICA */
+        document.getElementById('phoneField').addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, "");
+            v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+            v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+            e.target.value = v;
+        });
+
         /* MÁSCARA CPF AUTOMÁTICA */
         document.getElementById('cpfField').addEventListener('input', function(e) {
             let v = e.target.value.replace(/\D/g, "");
@@ -940,10 +953,16 @@
         document.getElementById('rdsForm').onsubmit = async (e) => {
             e.preventDefault();
             
+            const telefone = document.getElementById('phoneField').value.replace(/\D/g, '');
             const cpf = document.getElementById('cpfField').value.replace(/\D/g, '');
             const totalValor = parseFloat((qtd * PRECO).toFixed(2));
             const btnSubmit = document.querySelector('.btn-comprar-green');
             
+            if (telefone.length < 10) {
+                alert('Por favor, informe um número de celular válido com DDD.');
+                return;
+            }
+
             if (cpf.length !== 11) {
                 alert('Por favor, informe um CPF válido.');
                 return;
@@ -956,13 +975,12 @@
                 const response = await fetch('/api/pix', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cpf, valor: totalValor, qtd })
+                    body: JSON.stringify({ telefone, cpf, valor: totalValor, qtd })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Trata tanto a resposta formatada quanto a resposta bruta da API
                     const pixCopiaECola = data.qr_code || data.point_of_interaction?.transaction_data?.qr_code;
                     const qrCodeBase64 = data.qr_code_base64 || data.point_of_interaction?.transaction_data?.qr_code_base64;
 
