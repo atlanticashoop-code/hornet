@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     
     // COLE SUA CHAVE ANON PUBLIC DO SUPABASE AQUI DENTRO DAS ASPAS:
-    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_PUBLIC_AQUI';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
     // Formata o CPF para o padrão 000.000.000-00
     const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
