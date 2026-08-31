@@ -103,7 +103,7 @@ module.exports = async (req, res) => {
 
     // --- SALVAR NO SUPABASE ---
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
-    const SUPABASE_ANON_KEY = 'sb_publishable_lGtzhKr3071NaxYCnMKn5g_hKHidtU7'; // <--- COLE SUA CHAVE ANON AQUI
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4'; // <--- COLE SUA CHAVE ANON AQUI
 
     try {
       await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
