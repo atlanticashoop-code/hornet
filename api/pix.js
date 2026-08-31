@@ -1,142 +1,109 @@
-// Arquivo: /api/pix.js
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, apikey');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método não permitido.' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ message: 'Método não permitido.' });
 
   try {
-    const { telefone, cpf, valor, qtd } = req.body || {};
+    const { cpf, telefone, valor, qtd } = req.body || {};
 
-    const cleanPhone = telefone ? String(telefone).replace(/\D/g, '') : '';
-    const cleanCpf = cpf ? String(cpf).replace(/\D/g, '') : '';
-
-    if (!cleanPhone || cleanPhone.length < 10) {
-      return res.status(400).json({ message: 'Celular inválido.' });
-    }
+    const cleanCpf = String(cpf || '').replace(/\D/g, '');
+    const cleanPhone = String(telefone || '').replace(/\D/g, '');
 
     if (!cleanCpf || cleanCpf.length !== 11) {
       return res.status(400).json({ message: 'CPF inválido.' });
     }
 
-    const numericAmount = Number(valor);
-    if (!numericAmount || numericAmount <= 0) {
-      return res.status(400).json({ message: 'Valor inválido.' });
+    // Configurações das APIs
+    const MP_ACCESS_TOKEN = 'APP_USR-8568413033783803-082914-edc65dc648a813113da7590030ded6f7-3651775878';
+    const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
+
+    // 1. Gera os números das cotas aleatoriamente
+    const numerosSorteados = [];
+    while (numerosSorteados.length < parseInt(qtd || 1)) {
+      const num = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+      if (!numerosSorteados.includes(num)) {
+        numerosSorteados.push(num);
+      }
     }
 
-    const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
-    if (!token) {
-      return res.status(500).json({
-        message: 'MERCADO_PAGO_ACCESS_TOKEN não está configurado na Vercel.'
+    // 2. Tenta salvar primeiro a intenção de compra na tabela "bilhetes" do Supabase
+    const payloadSupabase = {
+      cpf: cleanCpf,
+      telefone: cleanPhone,
+      qtd: parseInt(qtd || 1),
+      valor: parseFloat(valor),
+      numeros: numerosSorteados,
+      status: 'pendente'
+    };
+
+    const supabaseRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(payloadSupabase)
+    });
+
+    const supabaseText = await supabaseRes.text();
+
+    if (!supabaseRes.ok) {
+      console.error('ERRO AO SALVAR NO SUPABASE:', supabaseText);
+      return res.status(500).json({ 
+        message: 'Erro ao salvar bilhete no banco de dados. Verifique a chave Supabase ou a estrutura da tabela.',
+        detalhes: supabaseText 
       });
     }
 
-    const areaCode = cleanPhone.substring(0, 2);
-    const phoneNumber = cleanPhone.substring(2);
-
-    // Dados para o Mercado Pago
-    const paymentData = {
-      transaction_amount: numericAmount,
-      description: `RDS PRÊMIOS - ${qtd || 1} Cota(s)`,
+    // 3. Gera a cobrança Pix no Mercado Pago
+    const mpPayload = {
+      transaction_amount: parseFloat(valor),
+      description: `Rifa Moto - ${qtd} cotas`,
       payment_method_id: 'pix',
       payer: {
-        email: `cliente${cleanCpf}@gmail.com`, // Formato de e-mail comum aceito pelo MP
+        email: `cliente_${cleanCpf}@rifamoto.com`,
         first_name: 'Cliente',
-        last_name: 'RDS',
         identification: {
           type: 'CPF',
           number: cleanCpf
-        },
-        phone: {
-          area_code: areaCode,
-          number: phoneNumber
         }
       }
     };
 
-    const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
+    const mpRes = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token.trim()}`,
-        'X-Idempotency-Key': `pix-${cleanCpf}-${Date.now()}`
+        'X-Idempotency-Key': `${cleanCpf}-${Date.now()}`
       },
-      body: JSON.stringify(paymentData)
+      body: JSON.stringify(mpPayload)
     });
 
-    const data = await mpResponse.json();
+    const mpData = await mpRes.json();
 
-    if (!mpResponse.ok) {
-      console.error('Erro Mercado Pago:', data);
-      return res.status(mpResponse.status).json({
-        message: data.message || (data.cause && data.cause[0] ? data.cause[0].description : 'Erro ao gerar cobrança no Mercado Pago.'),
-        details: data
-      });
+    if (!mpRes.ok) {
+      console.error('ERRO MERCADO PAGO:', mpData);
+      return res.status(500).json({ message: 'Erro ao gerar Pix no Mercado Pago.', detalhes: mpData });
     }
 
-    const qrCode = data.point_of_interaction?.transaction_data?.qr_code;
-    const qrCodeBase64 = data.point_of_interaction?.transaction_data?.qr_code_base64;
-
-    if (!qrCode) {
-      return res.status(500).json({ message: 'Pix não retornado do Mercado Pago.' });
-    }
-
-    // --- GERAR NÚMEROS DE COTAS ALEATÓRIAS ---
-    const totalCotas = Number(qtd) || 1;
-    const numerosGerados = [];
-    for (let i = 0; i < totalCotas; i++) {
-      const num = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-      numerosGerados.push(num);
-    }
-
-    // --- SALVAR NO SUPABASE ---
-    const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4'; // <--- COLE SUA CHAVE ANON AQUI
-
-    try {
-      await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          cpf: cleanCpf,
-          telefone: cleanPhone,
-          qtd: totalCotas,
-          numeros: numerosGerados,
-          valor: numericAmount,
-          status: 'pendente'
-        })
-      });
-    } catch (dbErr) {
-      console.error('Erro ao salvar no banco:', dbErr);
-    }
+    const qrCode = mpData.point_of_interaction?.transaction_data?.qr_code;
 
     return res.status(200).json({
-      id: data.id,
-      status: data.status,
+      sucesso: true,
       qr_code: qrCode,
-      qr_code_base64: qrCodeBase64,
-      numeros: numerosGerados
+      numeros: numerosSorteados
     });
 
-  } catch (error) {
-    console.error('Erro no servidor (/api/pix.js):', error);
-    return res.status(500).json({ message: 'Erro interno ao processar requisição.' });
+  } catch (err) {
+    console.error('Erro geral no Pix:', err);
+    return res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
