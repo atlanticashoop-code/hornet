@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* MÁSCARA AUTOMÁTICA DE CPF (CHECKOUT E BUSCA) */
+    /* MÁSCARA AUTOMÁTICA DE CPF (CHECKOUT E CONSULTA) */
     const aplicarMascaraCpf = (el) => {
         if (!el) return;
         el.addEventListener('input', function(e) {
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     aplicarMascaraCpf(document.getElementById('input-cpf-busca'));
     aplicarMascaraCpf(document.getElementById('cpfConsulta'));
 
-    /* SUBMISSÃO DO FORMULÁRIO / PIX COPIA E COLA */
+    /* SUBMISSÃO DO FORMULÁRIO / GERAR PIX */
     const rdsForm = document.getElementById('rdsForm');
     if (rdsForm) {
         rdsForm.onsubmit = async (e) => {
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modalConsulta) modalConsulta.classList.remove('active');
             closeDrawer();
 
-            // Abre a página de bilhetes
+            // Exibe a página dinâmica de bilhetes
             exibirPaginaBilhetes(cpf, data.compras);
 
         } catch (err) {
@@ -295,88 +295,104 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Vincula evento no formulário de busca se existir
+    // Vincula evento no formulário do modal de consulta
     const formConsulta = document.querySelector('#modalConsulta form') || document.getElementById('formConsulta');
     if (formConsulta) {
         formConsulta.onsubmit = executarBuscaBilhetes;
     }
 
-    // Vincula evento no clique dos botões de busca conhecidos
+    // Vincula evento no clique dos botões de busca
     const btnBuscarBilhetes = document.getElementById('btnBuscarBilhetes') || document.getElementById('btnConsultar');
     if (btnBuscarBilhetes) {
         btnBuscarBilhetes.onclick = executarBuscaBilhetes;
     }
 });
 
-/* FUNÇÃO GLOBAL PARA RENDERIZAR E ABRIR A PÁGINA DE BILHETES */
-function exibirPaginaBilhetes(cpfFormatado, compras) {
+/* INJETA E EXIBE A TELA DE BILHETES SOBREPOSTA */
+function exibirPaginaBilhetes(cpfDigits, compras) {
     let container = document.getElementById('pagina-meus-bilhetes');
-    
-    // Fallback: caso a section não exista no HTML, cria dinamicamente
+
     if (!container) {
-        container = document.createElement('section');
+        container = document.createElement('div');
         container.id = 'pagina-meus-bilhetes';
-        container.className = 'container-bilhetes hidden';
-        container.innerHTML = `
-            <div class="header-bilhetes">
-                <button id="btn-voltar-bilhetes" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
-                <h2>Meus Bilhetes</h2>
-            </div>
-            <div id="resultado-cpf-info" class="cpf-info"></div>
-            <div id="lista-compras-container" class="lista-compras"></div>
-        `;
         document.body.appendChild(container);
     }
 
-    const infoCpf = document.getElementById('resultado-cpf-info');
-    const listaContainer = document.getElementById('lista-compras-container');
+    // Estilização para cobrir toda a tela por cima de modais e menus
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100vw';
+    container.style.height = '100vh';
+    container.style.backgroundColor = '#121212';
+    container.style.color = '#ffffff';
+    container.style.zIndex = '999999';
+    container.style.overflowY = 'auto';
+    container.style.padding = '20px';
+    container.style.boxSizing = 'border-box';
 
-    const cpfMascara = cpfFormatado.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    if (infoCpf) {
-        infoCpf.innerHTML = `Bilhetes encontrados para o CPF: <strong>${cpfMascara}</strong>`;
-    }
+    const cpfMascara = cpfDigits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
-    if (listaContainer) {
-        listaContainer.innerHTML = '';
+    let comprasHtml = '';
+    compras.forEach((c, i) => {
+        // Extração dos números salvos (trata Array, JSON string ou String separada por vírgulas)
+        let numerosArray = [];
+        if (Array.isArray(c.numeros)) {
+            numerosArray = c.numeros;
+        } else if (typeof c.numeros === 'string') {
+            try {
+                numerosArray = JSON.parse(c.numeros);
+            } catch (e) {
+                numerosArray = c.numeros.split(',').map(n => n.trim());
+            }
+        }
 
-        compras.forEach((compra, index) => {
-            const card = document.createElement('div');
-            card.className = 'card-compra';
+        const cotasTags = (Array.isArray(numerosArray) && numerosArray.length > 0)
+            ? numerosArray.map(n => 
+                `<span style="display:inline-block; background:#25d366; color:#000; font-weight:bold; padding:4px 8px; margin:3px; border-radius:4px; font-size:14px;">${n}</span>`
+              ).join('')
+            : '<span style="color:#888;">Nenhum número reservado</span>';
 
-            const statusClass = compra.status === 'pago' ? 'pago' : 'pendente';
-            const statusText = compra.status === 'pago' ? 'Pago / Confirmado' : 'Aguardando Pagamento';
+        const statusLabel = c.status === 'pago' ? 
+            '<span style="color:#25d366; font-weight:bold; background:rgba(37, 211, 102, 0.1); padding:3px 8px; border-radius:4px;">PAGO / CONFIRMADO</span>' : 
+            '<span style="color:#ffbb00; font-weight:bold; background:rgba(255, 187, 0, 0.1); padding:3px 8px; border-radius:4px;">AGUARDANDO PAGAMENTO</span>';
 
-            const cotasHtml = Array.isArray(compra.numeros)
-                ? compra.numeros.map(n => `<span class="cota-tag">${n}</span>`).join('')
-                : '<span>Nenhum número gerado</span>';
-
-            card.innerHTML = `
-                <div class="card-compra-header">
-                    <span>Compra #${compras.length - index} (${compra.qtd} Cotas)</span>
-                    <span class="badge-status ${statusClass}">${statusText}</span>
+        comprasHtml += `
+            <div style="background:#1e1e1e; border:1px solid #333; border-radius:8px; padding:15px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #2a2a2a; padding-bottom:10px;">
+                    <strong>Pedido #${compras.length - i}</strong>
+                    <div>${statusLabel}</div>
                 </div>
-                <div><strong>Valor:</strong> R$ ${Number(compra.valor || 0).toFixed(2)}</div>
-                <div style="margin-top: 10px;">
-                    <strong>Seus Números:</strong>
-                    <div class="cotas-grid">${cotasHtml}</div>
+                <p style="margin:5px 0;"><strong>Qtd de Cotas:</strong> ${c.qtd || (Array.isArray(numerosArray) ? numerosArray.length : 0)}</p>
+                <p style="margin:5px 0;"><strong>Valor Total:</strong> R$ ${Number(c.valor || 0).toFixed(2).replace('.', ',')}</p>
+                <div style="margin-top:10px;">
+                    <strong style="display:block; margin-bottom:6px;">Seus Números:</strong>
+                    <div>${cotasTags}</div>
                 </div>
-            `;
+            </div>
+        `;
+    });
 
-            listaContainer.appendChild(card);
-        });
-    }
+    container.innerHTML = `
+        <div style="max-width:600px; margin:0 auto; padding-bottom:40px;">
+            <button onclick="fecharPaginaBilhetes()" 
+                    style="background:#333; color:#fff; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; margin-bottom:20px; font-weight:bold; display:inline-flex; align-items:center; gap:5px;">
+                ← Voltar ao Início
+            </button>
+            <h2 style="margin-bottom:5px; color:#25d366;">Meus Bilhetes</h2>
+            <p style="color:#aaa; margin-bottom:20px;">CPF consultado: <strong>${cpfMascara}</strong></p>
+            <div>${comprasHtml}</div>
+        </div>
+    `;
 
-    // Remove a classe 'hidden' e força exibição via estilo
-    container.classList.remove('hidden');
     container.style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* FUNÇÃO GLOBAL PARA FECHAR A PÁGINA DE BILHETES */
+/* FUNÇÃO GLOBAL PARA FECHAR A TELA DE BILHETES */
 function fecharPaginaBilhetes() {
     const container = document.getElementById('pagina-meus-bilhetes');
     if (container) {
-        container.classList.add('hidden');
         container.style.display = 'none';
     }
 }
