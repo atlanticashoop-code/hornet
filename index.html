@@ -2,543 +2,1128 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa Oficial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RDS PRÊMIOS - HORNETÃO BLUE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --primary: #22c55e;
-            --primary-hover: #16a34a;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --border-color: #334155;
+        /* Estilos da Tela de Meus Bilhetes */
+        .container-bilhetes {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: #0f172a;
+          color: #ffffff;
+          z-index: 9999;
+          overflow-y: auto;
+          padding: 20px;
+          box-sizing: border-box;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        .container-bilhetes.hidden {
+          display: none !important;
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 40px;
+        .header-bilhetes {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 25px;
+          border-bottom: 1px solid #334155;
+          padding-bottom: 15px;
         }
 
-        header {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        #btn-voltar-bilhetes {
+          background: #334155;
+          color: #fff;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: bold;
         }
 
-        .logo {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary);
+        .cpf-info {
+          font-size: 1.1rem;
+          margin-bottom: 20px;
+          color: #94a3b8;
         }
 
-        nav button {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-left: 6px;
-        }
-
-        nav button:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 0 16px;
-        }
-
-        .section-page {
-            display: block;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .banner-img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            object-fit: cover;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 16px;
-        }
-
-        .price-tag {
-            font-size: 1.2rem;
-            color: var(--primary);
-            font-weight: bold;
-            margin-bottom: 16px;
-        }
-
-        /* Seletor de Cotas */
-        .btn-cotas-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .btn-cota-add {
-            background-color: #2d3748;
-            color: #fff;
-            border: 1px solid var(--border-color);
-            padding: 12px 0;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn-cota-add:active {
-            transform: scale(0.98);
-            background-color: var(--border-color);
-        }
-
-        .qtd-selector {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--bg-color);
-            padding: 8px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .qtd-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: #fff;
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        .btn-submit {
-            width: 100%;
-            background-color: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-submit:hover {
-            background-color: var(--primary-hover);
-        }
-
-        /* Inputs de formulário */
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-color);
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        /* Modal/Área Pix */
-        .pix-area {
-            text-align: center;
-        }
-
-        .qr-code-box {
-            background: #fff;
-            padding: 16px;
-            display: inline-block;
-            border-radius: 8px;
-            margin: 16px 0;
-        }
-
-        .qr-code-box img {
-            width: 180px;
-            height: 180px;
-        }
-
-        .pix-copia-cola {
-            width: 100%;
-            word-break: break-all;
-            background: var(--bg-color);
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-        }
-
-        /* Cards de Compras */
         .card-compra {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
+          background: #1e293b;
+          border-radius: 12px;
+          padding: 18px;
+          margin-bottom: 15px;
+          border: 1px solid #334155;
         }
 
         .card-compra-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          font-weight: bold;
         }
 
         .badge-status {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          text-transform: uppercase;
         }
-
-        .badge-status.pago {
-            background-color: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-        }
-
-        .badge-status.pendente {
-            background-color: rgba(234, 179, 8, 0.2);
-            color: #eab308;
-        }
+        .badge-status.pago { background: #16a34a; color: #fff; }
+        .badge-status.pendente { background: #eab308; color: #000; }
 
         .cotas-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 10px;
         }
 
         .cota-tag {
-            background: var(--card-bg);
+          background: #2563eb;
+          color: #fff;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-family: monospace;
+          font-weight: bold;
+        }
+
+        :root {
+            --bg-body: #0a0c10;
+            --bg-card: #121620;
+            --bg-card-hover: #1a202c;
+            --border-color: #232d3f;
+            --primary-yellow: #ffc107;
+            --primary-green: #00e676;
+            --neon-green: #39ff14;
+            --text-main: #ffffff;
+            --text-sub: #a0aec0;
+            --radius-main: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding-top: 65px;
+            padding-bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* TOPO COM MENU NA DIREITA */
+        .rds-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 62px;
+            background: #06080c;
+            border-bottom: 2px solid var(--primary-yellow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            font-weight: 900;
+            font-size: 1.15rem;
+            color: var(--neon-green);
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .menu-btn-hamburger {
+            background: transparent;
+            border: none;
+            color: var(--primary-yellow);
+            font-size: 1.6rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-meus-numeros {
+            background: var(--primary-yellow);
+            color: #000;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        /* MENU GAVETA LATERAL */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 200;
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .drawer-menu {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: #0d1117;
+            border-left: 1px solid var(--border-color);
+            z-index: 201;
+            transition: right 0.3s ease;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer-menu.active {
+            right: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .drawer-header h3 {
+            color: var(--primary-yellow);
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .drawer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .drawer-links li a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .drawer-links li a:hover {
+            background: var(--bg-card);
+            color: var(--primary-yellow);
+        }
+
+        /* CONTAINER PRINCIPAL */
+        .main-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-rifa {
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: var(--radius-main);
+            overflow: hidden;
+        }
+
+        /* CARROSSEL DE FOTOS */
+        .banner-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        .carousel-track {
+            display: flex;
+            width: 200%;
+            height: 100%;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .banner-img {
+            width: 50%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-btn.prev { left: 10px; }
+        .carousel-btn.next { right: 10px; }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s, width 0.3s;
+        }
+
+        .dot.active {
+            background: var(--primary-yellow);
+            width: 22px;
+            border-radius: 10px;
+        }
+
+        .tag-status {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #e53e3e;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        .rifa-content { padding: 16px; }
+        .rifa-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; }
+        .rifa-subtitle { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 14px; }
+
+        .progress-box {
+            background: #080a0e;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 14px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-sub);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #1a202c;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 78%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-yellow) 0%, var(--primary-green) 100%);
+        }
+
+        .price-tag-rds {
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid var(--primary-green);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-tag-rds span { font-size: 0.85rem; color: var(--text-sub); font-weight: 600; }
+        .price-tag-rds strong { font-size: 1.3rem; color: var(--primary-green); font-weight: 900; }
+
+        /* COTAS PREMIADAS */
+        .cotas-premiadas-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cotas-badges {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+
+        .badge-numero {
+            background: #1a202c;
+            border: 1px solid var(--primary-yellow);
+            color: var(--primary-yellow);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* SELEÇÃO DE COTAS */
+        .selecao-cotas-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
+            padding: 16px;
+        }
+
+        .grid-rapida {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-cota-rds {
+            background: #161b26;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .btn-cota-rds.active {
+            border-color: var(--primary-green);
+            background: rgba(0, 230, 118, 0.08);
+        }
+
+        .btn-cota-rds .qtd { font-size: 1.4rem; font-weight: 900; color: #fff; }
+        .btn-cota-rds .lbl { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; font-weight: 700; }
+        .btn-cota-rds .val { font-size: 0.85rem; font-weight: 800; color: var(--primary-green); margin-top: 2px; }
+
+        .pop-tag {
+            position: absolute;
+            top: -10px;
+            background: var(--primary-yellow);
+            color: #000;
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .stepper-rds {
+            display: flex;
+            align-items: center;
+            margin-top: 14px;
+            background: #080a0e;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .stepper-rds button {
+            width: 50px; height: 46px; background: #1a202c; border: none; color: #fff; font-size: 1.4rem; font-weight: 800; cursor: pointer;
+        }
+
+        .stepper-rds input {
+            flex: 1; background: transparent; border: none; text-align: center; color: #fff; font-weight: 800; font-size: 1.1rem;
+        }
+
+        /* CHECKOUT */
+        .checkout-card-rds {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
+            padding: 16px;
+        }
+
+        .field-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .field-box label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
+
+        .field-box input {
+            background: #080a0e;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .btn-comprar-green {
+            width: 100%;
+            background: var(--primary-green);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1.05rem;
+            margin-top: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3);
+            text-transform: uppercase;
+        }
+
+        /* RODAPÉ PROFISSIONAL */
+        .rds-footer {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 20px;
+            padding: 20px 14px;
+            background: #06080c;
+            border-top: 1px solid var(--border-color);
+            border-radius: var(--radius-main);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .footer-badges {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-sec {
+            background: #121620;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-info {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
             font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .footer-links a {
+            color: var(--primary-yellow);
+            text-decoration: none;
+        }
+
+        .footer-copy {
+            font-size: 0.7rem;
+            color: #4a5568;
+            border-top: 1px solid #1a202c;
+            padding-top: 12px;
+        }
+
+        /* BOTTOM DOCK BAR */
+        .bottom-bar-rds {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 70px;
+            background: #06080c;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 90;
+        }
+
+        .dock-val { font-size: 1.3rem; font-weight: 900; color: var(--primary-green); }
+
+        .dock-btn-rds {
+            background: var(--primary-green);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* MODAIS */
+        .modal-bg {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: none; align-items: flex-end; justify-content: center; z-index: 300;
+        }
+        .modal-bg.active { display: flex; }
+
+        .modal-body {
+            background: var(--bg-card);
+            width: 100%; max-width: 480px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            padding: 24px 20px; position: relative;
+            border-top: 2px solid var(--primary-yellow);
+            text-align: center;
+        }
+
+        .modal-close {
+            position: absolute; top: 16px; right: 16px;
+            background: none; border: none; color: var(--text-sub); font-size: 1.8rem; cursor: pointer;
+        }
+
+        .modal-content-text {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-top: 12px;
+            text-align: left;
+        }
+
+        .modal-content-text p { margin-bottom: 10px; }
+
+        .qr-code-img {
+            max-width: 200px;
+            width: 100%;
+            margin: 15px auto;
+            border-radius: 10px;
+            border: 4px solid #fff;
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo" onclick="mostrarPagina('pagina-home')" style="cursor:pointer;">RIFA DA MOTO</div>
-        <nav>
-            <button onclick="mostrarPagina('pagina-meus-bilhetes')">Meus Bilhetes</button>
-            <button onclick="mostrarPagina('pagina-suporte')">Suporte</button>
-        </nav>
+    <!-- BARRA SUPERIOR -->
+    <header class="rds-header">
+        <div class="header-left">
+            <div class="brand-logo">🍀 RDS PRÊMIOS</div>
+        </div>
+        <div class="header-right">
+            <button class="btn-meus-numeros" id="btnMeusNumeros">🔍 BILHETES</button>
+            <button class="menu-btn-hamburger" id="openDrawer">☰</button>
+        </div>
     </header>
 
-    <div class="container">
+    <!-- MENU GAVETA LATERAL -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <nav class="drawer-menu" id="drawerMenu">
+        <div class="drawer-header">
+            <h3>Navegação</h3>
+            <button class="drawer-close" id="closeDrawer">✕</button>
+        </div>
+        <ul class="drawer-links">
+            <li><a href="#" id="navInicio">🏠 Início</a></li>
+            <li><a href="#" id="navMeusBilhetes">🎫 Meus Bilhetes</a></li>
+            <li><a href="#" id="navRegulamento">📜 Regulamento</a></li>
+            <li><a href="#" id="navTermos">⚖️ Termos de Uso</a></li>
+        </ul>
+    </nav>
 
-        <!-- PÁGINA PRINCIPAL / RIFA -->
-        <main id="pagina-home" class="section-page">
-            <div class="card">
-                <img src="https://via.placeholder.com/600x350?text=Sua+Moto+Aqui" alt="Foto da Moto" class="banner-img">
-                <h1>Rifa da Moto Exclusiva</h1>
-                <p class="subtitle">Garanta seus bilhetes e concorra. O sorteio será realizado após a venda das cotas!</p>
-                <div class="price-tag">R$ 0,50 por cota</div>
+    <main class="main-container">
 
-                <p style="font-size:0.9rem; margin-bottom:8px; color:var(--text-muted);">Adicionar cotas:</p>
-                <div class="btn-cotas-grid">
-                    <button class="btn-cota-add" onclick="adicionarCotas(5)">+5</button>
-                    <button class="btn-cota-add" onclick="adicionarCotas(10)">+10</button>
-                    <button class="btn-cota-add" onclick="adicionarCotas(50)">+50</button>
-                    <button class="btn-cota-add" onclick="adicionarCotas(100)">+100</button>
+        <!-- CARD PRINCIPAL COM GALERIA DE FOTOS -->
+        <section class="card-rifa">
+            <div class="banner-container">
+                <span class="tag-status">🔴 ADQUIRA JÁ</span>
+                
+                <div class="carousel-track" id="carouselTrack">
+                    <img src="https://i.postimg.cc/nrb5bGwc/49F67246-AA0E-4366-8940-C8ECCC7CCB19.png" alt="Hornetão Blue Foto 1" class="banner-img">
+                    <img src="https://i.postimg.cc/s2zzXY2B/0D91F578-F49B-4999-A911-E117C2295C81.png" alt="Hornetão Blue Foto 2" class="banner-img">
                 </div>
 
-                <div class="qtd-selector">
-                    <button class="qtd-btn" onclick="alterarQtd(-1)">-</button>
-                    <span id="qtd-display" style="font-size:1.2rem; font-weight:bold;">10</span>
-                    <button class="qtd-btn" onclick="alterarQtd(1)">+</button>
+                <button class="carousel-btn prev" id="prevSlide">❮</button>
+                <button class="carousel-btn next" id="nextSlide">❯</button>
+
+                <div class="carousel-dots">
+                    <span class="dot active" data-index="0"></span>
+                    <span class="dot" data-index="1"></span>
+                </div>
+            </div>
+
+            <div class="rifa-content">
+                <h1 class="rifa-title">HORNETÃO BLUE</h1>
+                <p class="rifa-subtitle">Sorteio realizado assim que todas as cotas forem vendidas! Entrega e transferência inclusas.</p>
+
+                <div class="progress-box">
+                    <div class="progress-header">
+                        <span>Progresso do Sorteio</span>
+                        <span>78% Vendido</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill"></div>
+                    </div>
                 </div>
 
-                <form id="form-checkout" onsubmit="gerarPix(event)">
-                    <div class="form-group">
-                        <label>Nome Completo</label>
-                        <input type="text" id="input-nome" placeholder="Seu nome completo" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Celular (WhatsApp)</label>
-                        <input type="tel" id="input-telefone" placeholder="(00) 00000-0000" required>
-                    </div>
-                    <div class="form-group">
-                        <label>CPF (Para consultar seus bilhetes)</label>
-                        <input type="text" id="input-cpf" placeholder="000.000.000-00" required>
-                    </div>
-
-                    <button type="submit" class="btn-submit" id="btn-comprar">
-                        Quero Participar (<span id="total-display">R$ 5,00</span>)
-                    </button>
-                </form>
+                <div class="price-tag-rds">
+                    <span>POR APENAS</span>
+                    <strong>R$ 2,99</strong>
+                </div>
             </div>
-        </main>
+        </section>
 
-        <!-- PÁGINA PAGAMENTO PIX -->
-        <section id="pagina-pix" class="section-page hidden">
-            <div class="card pix-area">
-                <h2>Pagamento via Pix</h2>
-                <p class="subtitle">Realize o pagamento para garantir suas cotas automaticamente.</p>
-                
-                <div class="qr-code-box">
-                    <img id="pix-qr-code" src="" alt="QR Code PIX">
+        <!-- COTAS PREMIADAS -->
+        <section class="cotas-premiadas-card">
+            <div class="section-title">🎁 COTAS PREMIADAS (PIX NA HORA)</div>
+            <div class="cotas-badges">
+                <div class="badge-numero">🏆 001122 - R$ 500</div>
+                <div class="badge-numero">🏆 003344 - R$ 500</div>
+                <div class="badge-numero">🏆 005566 - R$ 500</div>
+            </div>
+        </section>
+
+        <!-- SELEÇÃO DE COTAS -->
+        <section class="selecao-cotas-card">
+            <div class="section-title">🍀 SELECIONE A QUANTIDADE</div>
+
+            <div class="grid-rapida">
+                <button class="btn-cota-rds active" data-qtd="2">
+                    <span class="qtd">+2</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 5,98</span>
+                </button>
+                <button class="btn-cota-rds" data-qtd="10">
+                    <span class="pop-tag">MAIS VENDIDO</span>
+                    <span class="qtd">+10</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 29,90</span>
+                </button>
+                <button class="btn-cota-rds" data-qtd="50">
+                    <span class="qtd">+50</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 149,50</span>
+                </button>
+                <button class="btn-cota-rds" data-qtd="100">
+                    <span class="qtd">+100</span>
+                    <span class="lbl">COTAS</span>
+                    <span class="val">R$ 299,00</span>
+                </button>
+            </div>
+
+            <div class="stepper-rds">
+                <button id="btnLess">-</button>
+                <input type="number" id="qtdInput" value="2" min="1" inputmode="numeric">
+                <button id="btnMore">+</button>
+            </div>
+        </section>
+
+        <!-- CHECKOUT -->
+        <section class="checkout-card-rds" id="checkoutSection">
+            <div class="section-title">👤 DADOS DO PARTICIPANTE</div>
+
+            <form id="rdsForm">
+                <div class="field-box">
+                    <label>DIGITE SEU CELULAR (WHATSAPP):</label>
+                    <input type="tel" id="phoneField" placeholder="(00) 90000-0000" required maxlength="15" inputmode="numeric">
                 </div>
 
-                <div class="pix-copia-cola" id="pix-copia-cola-text">Carregando código...</div>
-                
-                <button class="btn-submit" onclick="copiarPix()" style="margin-bottom:12px;">Copiar Código Pix</button>
-                <button class="btn-cota-add" style="width:100%;" onclick="mostrarPagina('pagina-home')">Voltar ao Início</button>
-            </div>
+                <div class="field-box">
+                    <label>DIGITE SEU CPF PARA PARTICIPAR:</label>
+                    <input type="text" id="cpfField" placeholder="000.000.000-00" required maxlength="14" inputmode="numeric">
+                </div>
+
+                <button type="submit" class="btn-comprar-green">PAGAR COM PIX AGORA 🍀</button>
+            </form>
         </section>
 
-        <!-- PÁGINA MEUS BILHETES -->
-        <section id="pagina-meus-bilhetes" class="section-page hidden">
-            <div class="card">
-                <h2>Meus Bilhetes</h2>
-                <p class="subtitle">Digite seu CPF para buscar todas as suas cotas.</p>
-                
-                <form onsubmit="buscarBilhetesEvent(event)" style="margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label>CPF</label>
-                        <input type="text" id="busca-cpf" placeholder="000.000.000-00" required>
-                    </div>
-                    <button type="submit" class="btn-submit">Buscar Cotas</button>
-                </form>
-
-                <div id="resultado-cpf-info" style="margin-bottom:12px; font-size:0.9rem;"></div>
-                <div id="lista-compras-container"></div>
+        <!-- RODAPÉ PROFISSIONAL -->
+        <footer class="rds-footer">
+            <div class="footer-badges">
+                <span class="badge-sec">🔒 Conexão Segura SSL</span>
+                <span class="badge-sec">⚡ Pagamento Via PIX</span>
             </div>
-        </section>
+            
+            <p class="footer-info">
+                Proibida a venda de bilhetes para menores de 18 anos.
+            </p>
 
-        <!-- PÁGINA SUPORTE -->
-        <section id="pagina-suporte" class="section-page hidden">
-            <div class="card">
-                <h2>Atendimento e Suporte</h2>
-                <p class="subtitle" style="margin-top:10px;">Dúvidas sobre o sorteio, compras ou pagamentos? Entre em contato conosco pelo WhatsApp.</p>
-                <a href="https://wa.me/5500000000000" target="_blank" style="text-decoration:none;">
-                    <button class="btn-submit" style="background-color:#25D366; margin-top:10px;">
-                        Falar no WhatsApp
-                    </button>
-                </a>
+            <div class="footer-links">
+                <a href="#" id="footRegulamento">Regulamento</a> • 
+                <a href="#" id="footTermos">Termos de Uso</a>
             </div>
-        </section>
 
-        <!-- PÁGINA TERMOS DE USO -->
-        <section id="pagina-termos" class="section-page hidden">
-            <div class="card">
-                <h2>Termos de Uso</h2>
-                <p class="subtitle" style="margin-top:12px; line-height:1.5;">
-                    1. A rifa é promovida de forma privada.<br>
-                    2. O sorteio será agendado e informado assim que todas as cotas forem liquidadas.<br>
-                    3. O envio da moto ou retirada é de responsabilidade estipulada no regulamento oficial.<br>
-                    4. Os bilhetes pagos via Pix são processados de forma imediata.
-                </p>
+            <div class="footer-copy">
+                © 2026 RDS PRÊMIOS. Todos os direitos reservados.
             </div>
-        </section>
-
-        <footer style="text-align:center; margin-top:20px; color:var(--text-muted); font-size:0.8rem;">
-            <a href="#" onclick="mostrarPagina('pagina-termos')" style="color:var(--text-muted);">Termos de Uso</a> | 
-            <a href="#" onclick="mostrarPagina('pagina-suporte')" style="color:var(--text-muted);">Suporte</a>
         </footer>
 
+    </main>
+
+    <!-- BARRA FIXA INFERIOR -->
+    <div class="bottom-bar-rds">
+        <div>
+            <span style="font-size:0.7rem; color:var(--text-sub);">TOTAL:</span><br>
+            <span class="dock-val" id="dockVal">R$ 5,98</span>
+        </div>
+        <button class="dock-btn-rds" id="btnDockPagar">PARTICIPAR 🍀</button>
     </div>
 
-    <script>
-        const PRECO_COTA = 0.50;
-        let quantidadeAtual = 10;
-
-        function atualizarValores() {
-            document.getElementById('qtd-display').innerText = quantidadeAtual;
-            const total = (quantidadeAtual * PRECO_COTA).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('total-display').innerText = total;
-        }
-
-        function adicionarCotas(qtd) {
-            quantidadeAtual += qtd;
-            atualizarValores();
-        }
-
-        function alterarQtd(delta) {
-            if (quantidadeAtual + delta >= 1) {
-                quantidadeAtual += delta;
-                atualizarValores();
-            }
-        }
-
-        function mostrarPagina(idPagina) {
-            const paginas = document.querySelectorAll('.section-page');
-            paginas.forEach(p => p.classList.add('hidden'));
-            document.getElementById(idPagina).classList.remove('hidden');
-            window.scrollTo(0, 0);
-        }
-
-        async function gerarPix(event) {
-            event.preventDefault();
+    <!-- MODAL PIX (COM QR CODE E COPIA E COLA) -->
+    <div class="modal-bg" id="modalPix">
+        <div class="modal-body">
+            <button class="modal-close" id="closePix">✕</button>
+            <h3 style="color:var(--primary-yellow); font-weight:900;">PAGAMENTO PIX ⚡</h3>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 10px 0;">Escaneie o QR Code ou copie o código Pix Copia e Cola:</p>
             
-            const btn = document.getElementById('btn-comprar');
-            btn.innerText = "Gerando Pix...";
-            btn.disabled = true;
+            <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code PIX">
 
-            const payload = {
-                nome: document.getElementById('input-nome').value,
-                telefone: document.getElementById('input-telefone').value,
-                cpf: document.getElementById('input-cpf').value,
-                quantidade: quantidadeAtual
-            };
+            <input type="text" id="pixCode" readonly style="width:100%; padding:12px; background:#080a0e; border:1px solid var(--border-color); color:#fff; border-radius:8px; font-weight:700; text-align:center;">
+            <button id="btnCopiar" class="btn-comprar-green">COPIAR CHAVE PIX</button>
+            <button id="btnVerMeusBilhetesModal" class="btn-meus-numeros" style="width:100%; margin-top:10px; padding:12px;">VER MEUS BILHETES</button>
+        </div>
+    </div>
 
-            try {
-                const response = await fetch('/api/pix', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+    <!-- MODAL CONSULTA NÚMEROS -->
+    <div class="modal-bg" id="modalConsulta">
+        <div class="modal-body">
+            <button class="modal-close" id="closeConsulta">✕</button>
+            <h3 style="color:var(--primary-yellow); font-weight:900;">MEUS BILHETES</h3>
+            <div class="field-box" style="margin-top:12px; text-align:left;">
+                <label>DIGITE SEU CPF:</label>
+                <input type="text" id="cpfSearch" placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
+            </div>
+            <button class="btn-comprar-green" id="btnBuscarBilhetes" style="margin-top:12px;">BUSCAR BILHETES</button>
+        </div>
+    </div>
 
-                const data = await response.json();
+    <!-- MODAL REGULAMENTO -->
+    <div class="modal-bg" id="modalRegulamento">
+        <div class="modal-body">
+            <button class="modal-close" id="closeRegulamento">✕</button>
+            <h3 style="color:var(--primary-yellow); font-weight:900;">REGULAMENTO</h3>
+            <div class="modal-content-text">
+                <p>1. O sorteio só acontecerá quando 100% de todas as cotas forem devidamente vendidas e pagas.</p>
+                <p>2. A data oficial do sorteio será informada com antecedência em nossas redes sociais assim que a meta de vendas for atingida.</p>
+                <p>3. A entrega do veículo e a transferência de documentação para o nome do ganhador ficam totalmente por conta da <strong>RDS PRÊMIOS</strong>, sem nenhum custo adicional de frete ou transferência para o contemplado.</p>
+                <p>4. As reservas de cotas pendentes de pagamento via PIX expiram automaticamente em 15 minutos, sendo disponibilizadas novamente para o sistema.</p>
+            </div>
+        </div>
+    </div>
 
-                if (data.qr_code && data.qr_code_base64) {
-                    document.getElementById('pix-qr-code').src = `data:image/png;base64,${data.qr_code_base64}`;
-                    document.getElementById('pix-copia-cola-text').innerText = data.qr_code;
-                    mostrarPagina('pagina-pix');
-                } else {
-                    alert("Erro ao gerar o PIX. Tente novamente.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Falha de comunicação com o servidor.");
-            } finally {
-                btn.innerText = `Quero Participar (${(quantidadeAtual * PRECO_COTA).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})`;
-                btn.disabled = false;
-            }
+    <!-- MODAL TERMOS DE USO -->
+    <div class="modal-bg" id="modalTermos">
+        <div class="modal-body">
+            <button class="modal-close" id="closeTermos">✕</button>
+            <h3 style="color:var(--primary-yellow); font-weight:900;">TERMOS DE USO</h3>
+            <div class="modal-content-text">
+                <p>1. A participação na rifa é estritamente proibida para menores de 18 anos.</p>
+                <p>2. O participante declara que todas as informações prestadas no momento da compra (CPF e Contato) são verdadeiras e de sua autoria.</p>
+                <p>3. O prêmio será entregue devidamente transferido ao ganhador em até 5 dias úteis após a validação oficial do resultado e verificação do participante contemplado.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE MEUS BILHETES (Full Screen) -->
+    <section id="pagina-meus-bilhetes" class="container-bilhetes hidden">
+      <div class="header-bilhetes">
+        <button id="btn-voltar-bilhetes" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
+        <h2>Meus Bilhetes</h2>
+      </div>
+
+      <div id="resultado-cpf-info" class="cpf-info"></div>
+      <div id="lista-compras-container" class="lista-compras"></div>
+    </section>
+
+    <script>
+        const PRECO = 2.99;
+        let qtd = 2;
+
+        const qtdInput = document.getElementById('qtdInput');
+        const dockVal = document.getElementById('dockVal');
+        const buttons = document.querySelectorAll('.btn-cota-rds');
+
+        function update(val) {
+            qtd = parseInt(val) || 1;
+            if (qtd < 1) qtd = 1;
+            qtdInput.value = qtd;
+            const total = (qtd * PRECO).toFixed(2).replace('.', ',');
+            dockVal.textContent = `R$ ${total}`;
         }
 
-        function copiarPix() {
-            const texto = document.getElementById('pix-copia-cola-text').innerText;
-            navigator.clipboard.writeText(texto).then(() => {
-                alert("Código Pix copiado para a área de transferência!");
+        buttons.forEach(b => {
+            b.onclick = () => {
+                buttons.forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                update(b.getAttribute('data-qtd'));
+            };
+        });
+
+        document.getElementById('btnLess').onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd - 1); };
+        document.getElementById('btnMore').onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd + 1); };
+        qtdInput.oninput = (e) => { buttons.forEach(x => x.classList.remove('active')); update(e.target.value); };
+
+        /* CARROSSEL */
+        let currentSlide = 0;
+        const track = document.getElementById('carouselTrack');
+        const dots = document.querySelectorAll('.dot');
+
+        function goToSlide(index) {
+            currentSlide = index;
+            track.style.transform = `translateX(-${currentSlide * 50}%)`;
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === currentSlide);
             });
         }
 
-        function buscarBilhetesEvent(e) {
+        document.getElementById('nextSlide').onclick = () => goToSlide(currentSlide === 0 ? 1 : 0);
+        document.getElementById('prevSlide').onclick = () => goToSlide(currentSlide === 1 ? 0 : 1);
+        dots.forEach((dot, idx) => dot.onclick = () => goToSlide(idx));
+
+        /* GAVETA LATERAL */
+        const drawerMenu = document.getElementById('drawerMenu');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+
+        function openDrawer() {
+            drawerMenu.classList.add('active');
+            drawerOverlay.classList.add('active');
+        }
+
+        function closeDrawer() {
+            drawerMenu.classList.remove('active');
+            drawerOverlay.classList.remove('active');
+        }
+
+        document.getElementById('openDrawer').onclick = openDrawer;
+        document.getElementById('closeDrawer').onclick = closeDrawer;
+        drawerOverlay.onclick = closeDrawer;
+
+        /* MODAIS */
+        const modalConsulta = document.getElementById('modalConsulta');
+        const modalRegulamento = document.getElementById('modalRegulamento');
+        const modalTermos = document.getElementById('modalTermos');
+        const modalPix = document.getElementById('modalPix');
+
+        function openModal(modal) {
+            closeDrawer();
+            modal.classList.add('active');
+        }
+
+        document.getElementById('btnMeusNumeros').onclick = () => {
+            const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
+            if (cpfSalvo) {
+                exibirMeusBilhetesPorCpf(cpfSalvo);
+            } else {
+                openModal(modalConsulta);
+            }
+        };
+
+        document.getElementById('navMeusBilhetes').onclick = (e) => { 
+            e.preventDefault(); 
+            const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
+            if (cpfSalvo) {
+                exibirMeusBilhetesPorCpf(cpfSalvo);
+            } else {
+                openModal(modalConsulta);
+            }
+        };
+
+        document.getElementById('closeConsulta').onclick = () => modalConsulta.classList.remove('active');
+        document.getElementById('navRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
+        document.getElementById('footRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
+        document.getElementById('closeRegulamento').onclick = () => modalRegulamento.classList.remove('active');
+
+        document.getElementById('navTermos').onclick = (e) => { e.preventDefault(); openModal(modalTermos); };
+        document.getElementById('footTermos').onclick = (e) => { e.preventDefault(); openModal(modalTermos); };
+        document.getElementById('closeTermos').onclick = () => modalTermos.classList.remove('active');
+
+        document.getElementById('navInicio').onclick = (e) => {
             e.preventDefault();
-            const cpf = document.getElementById('busca-cpf').value;
-            exibirMeusBilhetesPorCpf(cpf);
+            closeDrawer();
+            fecharPaginaBilhetes();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        document.getElementById('closePix').onclick = () => modalPix.classList.remove('active');
+        document.getElementById('btnCopiar').onclick = () => {
+            const pixInput = document.getElementById('pixCode');
+            pixInput.select();
+            navigator.clipboard.writeText(pixInput.value);
+            alert('Chave PIX copiada com sucesso!');
+        };
+
+        document.getElementById('btnVerMeusBilhetesModal').onclick = () => {
+            modalPix.classList.remove('active');
+            const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
+            if (cpfSalvo) {
+                exibirMeusBilhetesPorCpf(cpfSalvo);
+            }
+        };
+
+        document.getElementById('btnDockPagar').onclick = () => {
+            document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        /* MÁSCARAS AUTOMÁTICAS */
+        document.getElementById('phoneField').addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, "");
+            v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+            v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+            e.target.value = v;
+        });
+
+        function applyCpfMask(input) {
+            input.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, "");
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                e.target.value = v;
+            });
+        }
+        applyCpfMask(document.getElementById('cpfField'));
+        applyCpfMask(document.getElementById('cpfSearch'));
+
+        /* NAVEGAÇÃO / TELA DE BILHETES */
+        function fecharPaginaBilhetes() {
+            document.getElementById('pagina-meus-bilhetes').classList.add('hidden');
         }
 
         async function exibirMeusBilhetesPorCpf(cpfOriginal) {
+            const containerBilhetes = document.getElementById('pagina-meus-bilhetes');
             const infoCpf = document.getElementById('resultado-cpf-info');
             const listaContainer = document.getElementById('lista-compras-container');
 
             const cpfApenasNumeros = String(cpfOriginal).replace(/\D/g, '');
-            const cpfFormatado = cpfApenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
             infoCpf.innerHTML = 'Buscando bilhetes...';
             listaContainer.innerHTML = '';
+            containerBilhetes.classList.remove('hidden');
 
             try {
                 const response = await fetch('/api/meus-bilhetes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        cpf: cpfApenasNumeros,
-                        cpfFormatado: cpfFormatado
-                    })
+                    body: JSON.stringify({ cpf: cpfApenasNumeros })
                 });
 
                 const data = await response.json();
-                console.log("=== RESPOSTA DA API ===", data);
-
+                const cpfFormatado = cpfApenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
                 infoCpf.innerHTML = `Exibindo bilhetes para o CPF: <strong>${cpfFormatado}</strong>`;
 
-                let listaCompras = [];
-                if (Array.isArray(data)) {
-                    listaCompras = data;
-                } else {
-                    listaCompras = data.compras || data.bilhetes || data.dados || data.pedidos || data.tickets || [];
-                }
+                const listaCompras = Array.isArray(data) ? data : (data.compras || data.bilhetes || data.dados || []);
 
-                if (listaCompras.length > 0) {
+                if ((data.sucesso !== false && response.ok) && listaCompras.length > 0) {
                     let htmlCards = '';
                     listaCompras.forEach((compra, i) => {
-                        const statusNormalizado = String(compra.status || compra.payment_status || '').toLowerCase();
-                        const ePago = ['pago', 'approved', 'paid', 'concluido'].includes(statusNormalizado);
-                        const statusClass = ePago ? 'pago' : 'pendente';
-                        const statusTexto = ePago ? 'Pago' : 'Pendente';
+                        const statusNormalizado = (compra.status || 'pago').toLowerCase();
+                        const isPago = ['pago', 'approved', 'paid', 'concluido'].includes(statusNormalizado);
+                        const statusClass = isPago ? 'pago' : 'pendente';
+                        const statusTexto = isPago ? 'Pago' : 'Pendente';
                         
-                        let cotas = compra.numeros || compra.cotas || compra.bilhetes || compra.numbers || [];
-                        if (typeof cotas === 'string') {
-                            cotas = cotas.split(',').map(c => c.trim());
-                        } else if (!Array.isArray(cotas)) {
-                            cotas = cotas ? [cotas] : [];
+                        let cotas = compra.numeros || compra.cotas || compra.bilhetes || [];
+                        if (!Array.isArray(cotas)) {
+                            cotas = [cotas];
                         }
-
-                        let cotasHtml = cotas.length > 0 
-                            ? cotas.map(c => `<span class="cota-tag">${c}</span>`).join('')
-                            : '<span style="color:#94a3b8;">Aguardando geração de cotas...</span>';
+                        
+                        let cotasHtml = cotas.map(c => `<span class="cota-tag">${c}</span>`).join('');
 
                         htmlCards += `
                             <div class="card-compra">
                                 <div class="card-compra-header">
-                                    <span>Compra #${compra.id || compra._id || (i + 1)}</span>
+                                    <span>Compra #${compra.id || (i + 1)}</span>
                                     <span class="badge-status ${statusClass}">${statusTexto}</span>
                                 </div>
-                                <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">
-                                    Quantidade: ${compra.qtd || compra.quantidade || cotas.length} cotas
-                                </p>
+                                <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">Quantidade: ${compra.qtd || cotas.length} cotas</p>
                                 <div class="cotas-grid">
                                     ${cotasHtml}
                                 </div>
@@ -547,22 +1132,101 @@
                     });
                     listaContainer.innerHTML = htmlCards;
                 } else {
-                    listaContainer.innerHTML = `
-                        <div class="card-compra" style="text-align:center;">
-                            <p>Nenhum bilhete encontrado para este CPF.</p>
-                            <small style="color:#94a3b8; display:block; margin-top:8px;">
-                                Verifique se o CPF utilizado no pagamento foi exatamente o mesmo.
-                            </small>
-                        </div>`;
+                    listaContainer.innerHTML = '<div class="card-compra"><p>Nenhum bilhete encontrado para este CPF.</p></div>';
                 }
             } catch (err) {
-                console.error("Erro na busca de bilhetes:", err);
-                listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro de conexão com o servidor. Tente novamente.</p></div>';
+                console.error(err);
+                listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro ao carregar bilhetes. Tente novamente.</p></div>';
             }
         }
 
-        // Inicialização
-        atualizarValores();
+        /* BUSCA POR CPF VIA MODAL */
+        const btnBuscar = document.getElementById('btnBuscarBilhetes');
+        const cpfSearchInput = document.getElementById('cpfSearch');
+
+        btnBuscar.onclick = async () => {
+            const cpf = cpfSearchInput.value.replace(/\D/g, '');
+
+            if (cpf.length !== 11) {
+                alert('Por favor, digite um CPF válido com 11 dígitos.');
+                return;
+            }
+
+            localStorage.setItem('ultimoCpfConsultado', cpf);
+            modalConsulta.classList.remove('active');
+            exibirMeusBilhetesPorCpf(cpf);
+        };
+
+        /* PROCESSA A COMPRA E GERA PIX VIA /api/pix */
+        document.getElementById('rdsForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const telefone = document.getElementById('phoneField').value.replace(/\D/g, '');
+            const cpf = document.getElementById('cpfField').value.replace(/\D/g, '');
+            const totalValor = parseFloat((qtd * PRECO).toFixed(2));
+            const btnSubmit = document.querySelector('.btn-comprar-green');
+            
+            if (telefone.length < 10) {
+                alert('Por favor, informe um número de celular válido com DDD.');
+                return;
+            }
+
+            if (cpf.length !== 11) {
+                alert('Por favor, informe um CPF válido.');
+                return;
+            }
+
+            btnSubmit.innerText = 'GERANDO PIX...';
+            btnSubmit.disabled = true;
+
+            try {
+                const response = await fetch('/api/pix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        telefone: telefone, 
+                        whatsapp: telefone, 
+                        cpf: cpf, 
+                        valor: totalValor, 
+                        valorTotal: totalValor,
+                        qtd: qtd 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && (data.sucesso || data.qr_code || data.pix_copia_cola)) {
+                    const pixCopiaECola = data.qr_code || data.pix_copia_cola || data.qrcode;
+                    const qrCodeImg = data.qr_code_base64 || data.qr_code_url || data.image_url;
+
+                    localStorage.setItem('ultimoCpfConsultado', cpf);
+
+                    if (pixCopiaECola) {
+                        document.getElementById('pixCode').value = pixCopiaECola;
+                        
+                        const qrImgElem = document.getElementById('qrCodeImg');
+                        if (qrCodeImg) {
+                            qrImgElem.src = qrCodeImg.startsWith('data:') || qrCodeImg.startsWith('http') ? qrCodeImg : `data:image/png;base64,${qrCodeImg}`;
+                            qrImgElem.style.display = 'block';
+                        } else {
+                            qrImgElem.style.display = 'none';
+                        }
+                        modalPix.classList.add('active');
+                    } else {
+                        alert('Pix gerado com sucesso! Seus bilhetes já foram salvos.');
+                        exibirMeusBilhetesPorCpf(cpf);
+                    }
+                } else {
+                    alert('Erro ao gerar Pix: ' + (data.message || data.erro || 'Verifique os dados informados.'));
+                }
+            } catch (error) {
+                alert('Erro de conexão com o servidor de pagamento.');
+                console.error(error);
+            } finally {
+                btnSubmit.innerText = 'PAGAR COM PIX AGORA 🍀';
+                btnSubmit.disabled = false;
+            }
+        };
     </script>
 </body>
 </html>
