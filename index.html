@@ -9,6 +9,90 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
+    /* Estilos da Página/Tela de Bilhetes */
+.container-bilhetes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0f172a; /* Fundo escuro elegante */
+  color: #ffffff;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.container-bilhetes.hidden {
+  display: none !important;
+}
+
+.header-bilhetes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 15px;
+}
+
+#btn-voltar-bilhetes {
+  background: #334155;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cpf-info {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  color: #94a3b8;
+}
+
+.card-compra {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 15px;
+  border: 1px solid #334155;
+}
+
+.card-compra-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.badge-status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+.badge-status.pago { background: #16a34a; color: #fff; }
+.badge-status.pendente { background: #eab308; color: #000; }
+
+.cotas-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cota-tag {
+  background: #2563eb;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: bold;
+}
+
         :root {
             --bg-body: #0a0c10;
             --bg-card: #121620;
