@@ -152,17 +152,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* MÁSCARA AUTOMÁTICA DE CPF */
-    const cpfField = document.getElementById('cpfField');
-    if (cpfField) {
-        cpfField.addEventListener('input', function(e) {
+    /* MÁSCARA AUTOMÁTICA DE CPF (CHECKOUT E BUSCA) */
+    const aplicarMascaraCpf = (el) => {
+        if (!el) return;
+        el.addEventListener('input', function(e) {
             let v = e.target.value.replace(/\D/g, "");
             v = v.replace(/(\d{3})(\d)/, "$1.$2");
             v = v.replace(/(\d{3})(\d)/, "$1.$2");
             v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
             e.target.value = v;
         });
-    }
+    };
+
+    aplicarMascaraCpf(document.getElementById('cpfField'));
+    aplicarMascaraCpf(document.getElementById('inputCpfBusca'));
+    aplicarMascaraCpf(document.getElementById('input-cpf-busca'));
+    aplicarMascaraCpf(document.getElementById('cpfConsulta'));
 
     /* SUBMISSÃO DO FORMULÁRIO / PIX COPIA E COLA */
     const rdsForm = document.getElementById('rdsForm');
@@ -223,106 +228,155 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    /* BUSCAR MEUS BILHETES E ABRIR NOVA PÁGINA */
-    const btnBuscarBilhetes = document.getElementById('btnBuscarBilhetes');
-    if (btnBuscarBilhetes) {
-        btnBuscarBilhetes.onclick = async () => {
-            const inputCpf = document.getElementById('inputCpfBusca');
-            const cpf = inputCpf ? inputCpf.value.replace(/\D/g, '') : '';
+    /* SISTEMA ROBUSTO DE BUSCA DE BILHETES */
+    async function executarBuscaBilhetes(e) {
+        if (e) e.preventDefault();
 
-            if (!cpf || cpf.length !== 11) {
-                alert('Por favor, informe um CPF válido com 11 dígitos.');
+        const inputCpf = document.getElementById('inputCpfBusca') || 
+                         document.getElementById('input-cpf-busca') || 
+                         document.getElementById('cpfConsulta');
+
+        if (!inputCpf) {
+            alert('Não foi possível localizar o campo de CPF no HTML. Verifique o ID do elemento.');
+            return;
+        }
+
+        const cpf = inputCpf.value.replace(/\D/g, '').trim();
+
+        if (!cpf || cpf.length !== 11) {
+            alert('Por favor, informe um CPF válido com 11 dígitos.');
+            return;
+        }
+
+        const btnSubmit = document.getElementById('btnBuscarBilhetes') || 
+                          document.getElementById('btnConsultar') ||
+                          (e && e.target ? e.target.querySelector('button') : null);
+
+        const originalText = btnSubmit ? btnSubmit.innerText : '';
+        if (btnSubmit) {
+            btnSubmit.innerText = 'BUSCANDO...';
+            btnSubmit.disabled = true;
+        }
+
+        try {
+            const response = await fetch('/api/meus-bilhetes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cpf })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.sucesso) {
+                alert(data.message || 'Erro ao consultar bilhetes no servidor.');
                 return;
             }
 
-            btnBuscarBilhetes.innerText = 'BUSCANDO...';
-            btnBuscarBilhetes.disabled = true;
-
-            try {
-                const response = await fetch('/api/meus-bilhetes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cpf })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.sucesso) {
-                    alert(data.message || 'Erro ao consultar bilhetes.');
-                    return;
-                }
-
-                if (!data.compras || data.compras.length === 0) {
-                    alert('Nenhum bilhete encontrado para este CPF.');
-                    return;
-                }
-
-                // Fecha o modal de consulta
-                if (modalConsulta) modalConsulta.classList.remove('active');
-
-                // Renderiza e abre a nova tela full-screen de bilhetes
-                exibirPaginaBilhetes(cpf, data.compras);
-
-            } catch (err) {
-                console.error('Erro ao consultar bilhetes:', err);
-                alert('Erro ao conectar ao servidor de consulta.');
-            } finally {
-                btnBuscarBilhetes.innerText = 'CONSULTAR';
-                btnBuscarBilhetes.disabled = false;
+            if (!data.compras || data.compras.length === 0) {
+                alert(`Nenhum bilhete cadastrado para o CPF: ${cpf}`);
+                return;
             }
-        };
+
+            // Fecha qualquer modal aberto
+            if (modalConsulta) modalConsulta.classList.remove('active');
+            closeDrawer();
+
+            // Abre a página de bilhetes
+            exibirPaginaBilhetes(cpf, data.compras);
+
+        } catch (err) {
+            console.error('Erro ao consultar bilhetes:', err);
+            alert('Erro ao conectar com o servidor. Verifique sua conexão.');
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.innerText = originalText || 'CONSULTAR';
+                btnSubmit.disabled = false;
+            }
+        }
+    }
+
+    // Vincula evento no formulário de busca se existir
+    const formConsulta = document.querySelector('#modalConsulta form') || document.getElementById('formConsulta');
+    if (formConsulta) {
+        formConsulta.onsubmit = executarBuscaBilhetes;
+    }
+
+    // Vincula evento no clique dos botões de busca conhecidos
+    const btnBuscarBilhetes = document.getElementById('btnBuscarBilhetes') || document.getElementById('btnConsultar');
+    if (btnBuscarBilhetes) {
+        btnBuscarBilhetes.onclick = executarBuscaBilhetes;
     }
 });
 
-/* FUNÇÃO PARA EXIBIR A PÁGINA COM OS BILHETES */
+/* FUNÇÃO GLOBAL PARA RENDERIZAR E ABRIR A PÁGINA DE BILHETES */
 function exibirPaginaBilhetes(cpfFormatado, compras) {
-    const container = document.getElementById('pagina-meus-bilhetes');
+    let container = document.getElementById('pagina-meus-bilhetes');
+    
+    // Fallback: caso a section não exista no HTML, cria dinamicamente
+    if (!container) {
+        container = document.createElement('section');
+        container.id = 'pagina-meus-bilhetes';
+        container.className = 'container-bilhetes hidden';
+        container.innerHTML = `
+            <div class="header-bilhetes">
+                <button id="btn-voltar-bilhetes" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
+                <h2>Meus Bilhetes</h2>
+            </div>
+            <div id="resultado-cpf-info" class="cpf-info"></div>
+            <div id="lista-compras-container" class="lista-compras"></div>
+        `;
+        document.body.appendChild(container);
+    }
+
     const infoCpf = document.getElementById('resultado-cpf-info');
     const listaContainer = document.getElementById('lista-compras-container');
-
-    if (!container || !listaContainer) return;
 
     const cpfMascara = cpfFormatado.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     if (infoCpf) {
         infoCpf.innerHTML = `Bilhetes encontrados para o CPF: <strong>${cpfMascara}</strong>`;
     }
 
-    listaContainer.innerHTML = '';
+    if (listaContainer) {
+        listaContainer.innerHTML = '';
 
-    compras.forEach((compra, index) => {
-        const card = document.createElement('div');
-        card.className = 'card-compra';
+        compras.forEach((compra, index) => {
+            const card = document.createElement('div');
+            card.className = 'card-compra';
 
-        const statusClass = compra.status === 'pago' ? 'pago' : 'pendente';
-        const statusText = compra.status === 'pago' ? 'Pago / Confirmado' : 'Aguardando Pagamento';
+            const statusClass = compra.status === 'pago' ? 'pago' : 'pendente';
+            const statusText = compra.status === 'pago' ? 'Pago / Confirmado' : 'Aguardando Pagamento';
 
-        const cotasHtml = Array.isArray(compra.numeros)
-            ? compra.numeros.map(n => `<span class="cota-tag">${n}</span>`).join('')
-            : '<span>Nenhum número gerado</span>';
+            const cotasHtml = Array.isArray(compra.numeros)
+                ? compra.numeros.map(n => `<span class="cota-tag">${n}</span>`).join('')
+                : '<span>Nenhum número gerado</span>';
 
-        card.innerHTML = `
-            <div class="card-compra-header">
-                <span>Compra #${compras.length - index} (${compra.qtd} Cotas)</span>
-                <span class="badge-status ${statusClass}">${statusText}</span>
-            </div>
-            <div><strong>Valor:</strong> R$ ${Number(compra.valor || 0).toFixed(2)}</div>
-            <div style="margin-top: 10px;">
-                <strong>Seus Números:</strong>
-                <div class="cotas-grid">${cotasHtml}</div>
-            </div>
-        `;
+            card.innerHTML = `
+                <div class="card-compra-header">
+                    <span>Compra #${compras.length - index} (${compra.qtd} Cotas)</span>
+                    <span class="badge-status ${statusClass}">${statusText}</span>
+                </div>
+                <div><strong>Valor:</strong> R$ ${Number(compra.valor || 0).toFixed(2)}</div>
+                <div style="margin-top: 10px;">
+                    <strong>Seus Números:</strong>
+                    <div class="cotas-grid">${cotasHtml}</div>
+                </div>
+            `;
 
-        listaContainer.appendChild(card);
-    });
+            listaContainer.appendChild(card);
+        });
+    }
 
-    // Exibe a tela de bilhetes
+    // Remove a classe 'hidden' e força exibição via estilo
     container.classList.remove('hidden');
+    container.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* FUNÇÃO PARA FECHAR A PÁGINA DE BILHETES */
+/* FUNÇÃO GLOBAL PARA FECHAR A PÁGINA DE BILHETES */
 function fecharPaginaBilhetes() {
     const container = document.getElementById('pagina-meus-bilhetes');
     if (container) {
         container.classList.add('hidden');
+        container.style.display = 'none';
     }
 }
