@@ -9,89 +9,89 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-    /* Estilos da Página/Tela de Bilhetes */
-.container-bilhetes {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #0f172a; /* Fundo escuro elegante */
-  color: #ffffff;
-  z-index: 9999;
-  overflow-y: auto;
-  padding: 20px;
-  box-sizing: border-box;
-}
+        /* Estilos da Tela de Meus Bilhetes */
+        .container-bilhetes {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: #0f172a;
+          color: #ffffff;
+          z-index: 9999;
+          overflow-y: auto;
+          padding: 20px;
+          box-sizing: border-box;
+        }
 
-.container-bilhetes.hidden {
-  display: none !important;
-}
+        .container-bilhetes.hidden {
+          display: none !important;
+        }
 
-.header-bilhetes {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 25px;
-  border-bottom: 1px solid #334155;
-  padding-bottom: 15px;
-}
+        .header-bilhetes {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 25px;
+          border-bottom: 1px solid #334155;
+          padding-bottom: 15px;
+        }
 
-#btn-voltar-bilhetes {
-  background: #334155;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
+        #btn-voltar-bilhetes {
+          background: #334155;
+          color: #fff;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: bold;
+        }
 
-.cpf-info {
-  font-size: 1.1rem;
-  margin-bottom: 20px;
-  color: #94a3b8;
-}
+        .cpf-info {
+          font-size: 1.1rem;
+          margin-bottom: 20px;
+          color: #94a3b8;
+        }
 
-.card-compra {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 18px;
-  margin-bottom: 15px;
-  border: 1px solid #334155;
-}
+        .card-compra {
+          background: #1e293b;
+          border-radius: 12px;
+          padding: 18px;
+          margin-bottom: 15px;
+          border: 1px solid #334155;
+        }
 
-.card-compra-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
+        .card-compra-header {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          font-weight: bold;
+        }
 
-.badge-status {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-}
-.badge-status.pago { background: #16a34a; color: #fff; }
-.badge-status.pendente { background: #eab308; color: #000; }
+        .badge-status {
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          text-transform: uppercase;
+        }
+        .badge-status.pago { background: #16a34a; color: #fff; }
+        .badge-status.pendente { background: #eab308; color: #000; }
 
-.cotas-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
+        .cotas-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 10px;
+        }
 
-.cota-tag {
-  background: #2563eb;
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-family: monospace;
-  font-weight: bold;
-}
+        .cota-tag {
+          background: #2563eb;
+          color: #fff;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-family: monospace;
+          font-weight: bold;
+        }
 
         :root {
             --bg-body: #0a0c10;
@@ -869,6 +869,7 @@
 
             <input type="text" id="pixCode" readonly style="width:100%; padding:12px; background:#080a0e; border:1px solid var(--border-color); color:#fff; border-radius:8px; font-weight:700; text-align:center;">
             <button id="btnCopiar" class="btn-comprar-green">COPIAR CHAVE PIX</button>
+            <button id="btnVerMeusBilhetesModal" class="btn-meus-numeros" style="width:100%; margin-top:10px; padding:12px;">VER MEUS BILHETES</button>
         </div>
     </div>
 
@@ -911,6 +912,17 @@
             </div>
         </div>
     </div>
+
+    <!-- TELA DE MEUS BILHETES (Full Screen) -->
+    <section id="pagina-meus-bilhetes" class="container-bilhetes hidden">
+      <div class="header-bilhetes">
+        <button id="btn-voltar-bilhetes" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
+        <h2>Meus Bilhetes</h2>
+      </div>
+
+      <div id="resultado-cpf-info" class="cpf-info"></div>
+      <div id="lista-compras-container" class="lista-compras"></div>
+    </section>
 
     <script>
         const PRECO = 2.99;
@@ -986,10 +998,26 @@
             modal.classList.add('active');
         }
 
-        document.getElementById('btnMeusNumeros').onclick = () => openModal(modalConsulta);
-        document.getElementById('navMeusBilhetes').onclick = (e) => { e.preventDefault(); openModal(modalConsulta); };
-        document.getElementById('closeConsulta').onclick = () => modalConsulta.classList.remove('active');
+        document.getElementById('btnMeusNumeros').onclick = () => {
+            const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
+            if (cpfSalvo) {
+                exibirMeusBilhetesPorCpf(cpfSalvo);
+            } else {
+                openModal(modalConsulta);
+            }
+        };
 
+        document.getElementById('navMeusBilhetes').onclick = (e) => { 
+            e.preventDefault(); 
+            const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
+            if (cpfSalvo) {
+                exibirMeusBilhetesPorCpf(cpfSalvo);
+            } else {
+                openModal(modalConsulta);
+            }
+        };
+
+        document.getElementById('closeConsulta').onclick = () => modalConsulta.classList.remove('active');
         document.getElementById('navRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
         document.getElementById('footRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
         document.getElementById('closeRegulamento').onclick = () => modalRegulamento.classList.remove('active');
@@ -1001,6 +1029,7 @@
         document.getElementById('navInicio').onclick = (e) => {
             e.preventDefault();
             closeDrawer();
+            fecharPaginaBilhetes();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -1012,11 +1041,19 @@
             alert('Chave PIX copiada!');
         };
 
+        document.getElementById('btnVerMeusBilhetesModal').onclick = () => {
+            modalPix.classList.remove('active');
+            const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
+            if (cpfSalvo) {
+                exibirMeusBilhetesPorCpf(cpfSalvo);
+            }
+        };
+
         document.getElementById('btnDockPagar').onclick = () => {
             document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
         };
 
-        /* MÁSCARA CELULAR AUTOMÁTICA */
+        /* MÁSCARAS AUTOMÁTICAS */
         document.getElementById('phoneField').addEventListener('input', function(e) {
             let v = e.target.value.replace(/\D/g, "");
             v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
@@ -1024,7 +1061,6 @@
             e.target.value = v;
         });
 
-        /* MÁSCARA CPF AUTOMÁTICA */
         function applyCpfMask(input) {
             input.addEventListener('input', function(e) {
                 let v = e.target.value.replace(/\D/g, "");
@@ -1037,7 +1073,65 @@
         applyCpfMask(document.getElementById('cpfField'));
         applyCpfMask(document.getElementById('cpfSearch'));
 
-        /* CONSULTA DE BILHETES POR CPF */
+        /* NAVEGAÇÃO / TELA DE BILHETES */
+        function fecharPaginaBilhetes() {
+            document.getElementById('pagina-meus-bilhetes').classList.add('hidden');
+        }
+
+        async function exibirMeusBilhetesPorCpf(cpfLimpo) {
+            const containerBilhetes = document.getElementById('pagina-meus-bilhetes');
+            const infoCpf = document.getElementById('resultado-cpf-info');
+            const listaContainer = document.getElementById('lista-compras-container');
+
+            infoCpf.innerHTML = 'Buscando bilhetes...';
+            listaContainer.innerHTML = '';
+            containerBilhetes.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/meus-bilhetes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cpf: cpfLimpo })
+                });
+
+                const data = await response.json();
+
+                const cpfFormatado = cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                infoCpf.innerHTML = `Exibindo bilhetes para o CPF: <strong>${cpfFormatado}</strong>`;
+
+                if (data.sucesso && data.compras && data.compras.length > 0) {
+                    let htmlCards = '';
+                    data.compras.forEach((compra, i) => {
+                        const statusClass = (compra.status === 'pago') ? 'pago' : 'pendente';
+                        const statusTexto = (compra.status === 'pago') ? 'Pago' : 'Pendente';
+                        
+                        let cotas = Array.isArray(compra.numeros) ? compra.numeros : [compra.numeros];
+                        let cotasHtml = cotas.map(c => `<span class="cota-tag">${c}</span>`).join('');
+
+                        htmlCards += `
+                            <div class="card-compra">
+                                <div class="card-compra-header">
+                                    <span>Compra #${compra.id || (i + 1)}</span>
+                                    <span class="badge-status ${statusClass}">${statusTexto}</span>
+                                </div>
+                                <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">Quantidade: ${compra.qtd} cotas</p>
+                                <div class="cotas-grid">
+                                    ${cotasHtml}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    listaContainer.innerHTML = htmlCards;
+                } else {
+                    listaContainer.innerHTML = '<div class="card-compra"><p>Nenhum bilhete encontrado para este CPF.</p></div>';
+                }
+            } catch (err) {
+                console.error(err);
+                listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro ao carregar bilhetes. Tente novamente.</p></div>';
+            }
+        }
+
+        /* BUSCA POR CPF VIA MODAL */
         const btnBuscar = document.getElementById('btnBuscarBilhetes');
         const cpfSearchInput = document.getElementById('cpfSearch');
 
@@ -1049,38 +1143,12 @@
                 return;
             }
 
-            btnBuscar.innerText = 'BUSCANDO...';
-            btnBuscar.disabled = true;
-
-            try {
-                const response = await fetch('/api/meus-bilhetes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cpf })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.compras && data.compras.length > 0) {
-                    let resultado = '📋 SEUS BILHETES ENCONTRADOS:\n\n';
-                    data.compras.forEach((compra, index) => {
-                        const nums = Array.isArray(compra.numeros) ? compra.numeros.join(', ') : compra.numeros;
-                        const status = compra.status ? compra.status.toUpperCase() : 'PENDENTE';
-                        resultado += `Compra ${index + 1} [${status}]:\nCotas: ${nums}\n\n`;
-                    });
-                    alert(resultado);
-                } else {
-                    alert('Nenhum bilhete encontrado para este CPF.');
-                }
-            } catch (err) {
-                alert('Erro ao consultar bilhetes. Tente novamente.');
-            } finally {
-                btnBuscar.innerText = 'BUSCAR BILHETES';
-                btnBuscar.disabled = false;
-            }
+            localStorage.setItem('ultimoCpfConsultado', cpf);
+            modalConsulta.classList.remove('active');
+            exibirMeusBilhetesPorCpf(cpf);
         };
 
-        /* CONEXÃO COM A ROTA /api/pix NA VERCEL */
+        /* PROCESSA A COMPRA E GERA PIX VIA /api/pix */
         document.getElementById('rdsForm').onsubmit = async (e) => {
             e.preventDefault();
             
@@ -1111,23 +1179,31 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    const pixCopiaECola = data.qr_code || data.point_of_interaction?.transaction_data?.qr_code;
-                    const qrCodeBase64 = data.qr_code_base64 || data.point_of_interaction?.transaction_data?.qr_code_base64;
+                if (response.ok && data.sucesso) {
+                    const pixCopiaECola = data.qr_code;
+                    const qrCodeBase64 = data.qr_code_base64;
 
-                    if (pixCopiaECola && qrCodeBase64) {
+                    // Salva CPF para fácil navegação
+                    localStorage.setItem('ultimoCpfConsultado', cpf);
+
+                    if (pixCopiaECola) {
                         document.getElementById('pixCode').value = pixCopiaECola;
-                        document.getElementById('qrCodeImg').src = `data:image/png;base64,${qrCodeBase64}`;
+                        if (qrCodeBase64) {
+                            document.getElementById('qrCodeImg').src = `data:image/png;base64,${qrCodeBase64}`;
+                            document.getElementById('qrCodeImg').style.display = 'block';
+                        } else {
+                            document.getElementById('qrCodeImg').style.display = 'none';
+                        }
                         modalPix.classList.add('active');
                     } else {
-                        alert('Erro ao carregar chave do Pix. Tente novamente.');
+                        alert('Pix gerado com sucesso! Seus bilhetes já foram salvos.');
+                        exibirMeusBilhetesPorCpf(cpf);
                     }
                 } else {
-                    alert('Erro Mercado Pago: ' + (data.message || 'Verifique os dados informados.'));
-                    console.error('Detalhes do erro:', data);
+                    alert('Erro ao gerar Pix: ' + (data.message || 'Verifique as informações prestadas.'));
                 }
             } catch (error) {
-                alert('Erro ao conectar ao servidor de pagamento.');
+                alert('Erro ao conectar com o servidor.');
                 console.error(error);
             } finally {
                 btnSubmit.innerText = 'PAGAR COM PIX AGORA 🍀';
@@ -1135,17 +1211,5 @@
             }
         };
     </script>
-    <!-- TELA / PÁGINA DE MEUS BILHETES (Escondida por padrão) -->
-<section id="pagina-meus-bilhetes" class="container-bilhetes hidden">
-  <div class="header-bilhetes">
-    <button id="btn-voltar-bilhetes" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
-    <h2>Meus Bilhetes</h2>
-  </div>
-
-  <div id="resultado-cpf-info" class="cpf-info"></div>
-
-  <!-- Lista onde serão renderizados os bilhetes -->
-  <div id="lista-compras-container" class="lista-compras"></div>
-</section>
 </body>
 </html>
