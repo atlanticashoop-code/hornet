@@ -14,61 +14,57 @@ module.exports = async (req, res) => {
     const cleanPhone = String(telefone || '').replace(/\D/g, '');
 
     if (!cleanCpf || cleanCpf.length !== 11) {
-      return res.status(400).json({ message: 'CPF inválido.' });
+      return res.status(400).json({ message: 'Informe um CPF válido com 11 dígitos.' });
     }
 
-    // Configurações das APIs
+    // =========================================================
+    // COLE ABAIXO SEU ACCESS TOKEN DE PRODUÇÃO DO MERCADO PAGO
+    // Exemplo: 'APP_USR-1234567890123456-083112-...'
+    // =========================================================
     const MP_ACCESS_TOKEN = 'APP_USR-8568413033783803-082914-edc65dc648a813113da7590030ded6f7-3651775878';
+
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
     // 1. Gera os números das cotas aleatoriamente
+    const quantidadeCotas = parseInt(qtd) || 1;
     const numerosSorteados = [];
-    while (numerosSorteados.length < parseInt(qtd || 1)) {
+    while (numerosSorteados.length < quantidadeCotas) {
       const num = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
       if (!numerosSorteados.includes(num)) {
         numerosSorteados.push(num);
       }
     }
 
-    // 2. Tenta salvar primeiro a intenção de compra na tabela "bilhetes" do Supabase
-    const payloadSupabase = {
-      cpf: cleanCpf,
-      telefone: cleanPhone,
-      qtd: parseInt(qtd || 1),
-      valor: parseFloat(valor),
-      numeros: numerosSorteados,
-      status: 'pendente'
-    };
-
-    const supabaseRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify(payloadSupabase)
-    });
-
-    const supabaseText = await supabaseRes.text();
-
-    if (!supabaseRes.ok) {
-      console.error('ERRO AO SALVAR NO SUPABASE:', supabaseText);
-      return res.status(500).json({ 
-        message: 'Erro ao salvar bilhete no banco de dados. Verifique a chave Supabase ou a estrutura da tabela.',
-        detalhes: supabaseText 
+    // 2. Tenta registrar a intenção no Supabase (não trava o Pix se houver erro)
+    try {
+      await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          cpf: cleanCpf,
+          telefone: cleanPhone,
+          qtd: quantidadeCotas,
+          valor: parseFloat(valor),
+          numeros: numerosSorteados,
+          status: 'pendente'
+        })
       });
+    } catch (e) {
+      console.error('Aviso: Erro ao registrar no Supabase antes do Pix:', e);
     }
 
-    // 3. Gera a cobrança Pix no Mercado Pago
+    // 3. Monta a requisição para o Mercado Pago
     const mpPayload = {
       transaction_amount: parseFloat(valor),
-      description: `Rifa Moto - ${qtd} cotas`,
+      description: `Rifa - ${quantidadeCotas} bilhete(s)`,
       payment_method_id: 'pix',
       payer: {
-        email: `cliente_${cleanCpf}@rifamoto.com`,
+        email: `cliente${cleanCpf}@suarifa.com`,
         first_name: 'Cliente',
         identification: {
           type: 'CPF',
@@ -90,20 +86,26 @@ module.exports = async (req, res) => {
     const mpData = await mpRes.json();
 
     if (!mpRes.ok) {
-      console.error('ERRO MERCADO PAGO:', mpData);
-      return res.status(500).json({ message: 'Erro ao gerar Pix no Mercado Pago.', detalhes: mpData });
+      console.error('Detalhes do erro no Mercado Pago:', mpData);
+      return res.status(500).json({ 
+        message: mpData.message || 'Erro ao comunicar com o Mercado Pago.',
+        erro_detalhado: mpData
+      });
     }
 
+    // Extrai o código Pix Copia e Cola
     const qrCode = mpData.point_of_interaction?.transaction_data?.qr_code;
+    const qrCodeBase64 = mpData.point_of_interaction?.transaction_data?.qr_code_base64;
 
     return res.status(200).json({
       sucesso: true,
       qr_code: qrCode,
+      qr_code_base64: qrCodeBase64,
       numeros: numerosSorteados
     });
 
   } catch (err) {
-    console.error('Erro geral no Pix:', err);
-    return res.status(500).json({ message: 'Erro interno no servidor.' });
+    console.error('Erro geral ao gerar Pix:', err);
+    return res.status(500).json({ message: 'Erro interno ao processar requisição.' });
   }
 };
