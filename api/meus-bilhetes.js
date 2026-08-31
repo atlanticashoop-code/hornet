@@ -1,5 +1,4 @@
 module.exports = async (req, res) => {
-  // Configuração dos cabeçalhos CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -18,20 +17,17 @@ module.exports = async (req, res) => {
 
   try {
     const body = req.body || {};
-    const cpf = body.cpf ? String(body.cpf).replace(/\D/g, '') : '';
+    const cleanCpf = body.cpf ? String(body.cpf).replace(/\D/g, '').trim() : '';
 
-    if (!cpf || cpf.length !== 11) {
+    if (!cleanCpf || cleanCpf.length !== 11) {
       return res.status(400).json({ message: 'Informe um CPF válido com 11 dígitos.' });
     }
 
-    // Configurações do Supabase
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
-    
-    // ATENÇÃO: Substitua pelo valor da sua chave anon public (eyJhbGciOi...)
-    const SUPABASE_ANON_KEY = 'sb_publishable_lGtzhKr3071NaxYCnMKn5g_hKHidtU7'; 
+    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI'; // <--- SUBSTiTUA PELA SUA CHAVE ANON
 
-    // Busca os bilhetes cadastrados para este CPF
-    const fetchResponse = await fetch(`${SUPABASE_REST_URL}/bilhetes?cpf=eq.${cpf}&select=*`, {
+    // Realiza a busca no Supabase filtrando pelo CPF limpo
+    const fetchResponse = await fetch(`${SUPABASE_REST_URL}/bilhetes?cpf=eq.${cleanCpf}&select=*`, {
       method: 'GET',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -40,21 +36,27 @@ module.exports = async (req, res) => {
       }
     });
 
+    const responseText = await fetchResponse.text();
+
     if (!fetchResponse.ok) {
-      const errorText = await fetchResponse.text();
-      console.error('Erro no Supabase:', errorText);
-      return res.status(500).json({ message: 'Erro ao consultar o banco de dados.' });
+      console.error('Erro na resposta do Supabase:', responseText);
+      return res.status(500).json({ message: 'Erro na consulta do banco de dados.', details: responseText });
     }
 
-    const compras = await fetchResponse.json();
+    let compras = [];
+    try {
+      compras = JSON.parse(responseText);
+    } catch (e) {
+      compras = [];
+    }
 
     return res.status(200).json({
       sucesso: true,
-      compras: compras || []
+      compras: Array.isArray(compras) ? compras : []
     });
 
   } catch (err) {
-    console.error('Erro na API:', err);
+    console.error('Erro geral na API de bilhetes:', err);
     return res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
