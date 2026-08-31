@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
     }
 
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
-    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI'; // <--- SUBSTiTUA PELA SUA CHAVE ANON
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4'; // <--- SUBSTiTUA PELA SUA CHAVE ANON
 
     // Realiza a busca no Supabase filtrando pelo CPF limpo
     const fetchResponse = await fetch(`${SUPABASE_REST_URL}/bilhetes?cpf=eq.${cleanCpf}&select=*`, {
