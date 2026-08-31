@@ -1,41 +1,35 @@
 module.exports = async (req, res) => {
-  // Configuração de cabeçalhos CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, apikey');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método não permitido.' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ message: 'Método não permitido.' });
 
   try {
     const body = req.body || {};
-    const cleanCpf = body.cpf ? String(body.cpf).replace(/\D/g, '').trim() : '';
+    const rawCpf = body.cpf ? String(body.cpf).trim() : '';
+    const cleanCpf = rawCpf.replace(/\D/g, '');
 
     if (!cleanCpf || cleanCpf.length !== 11) {
-      return res.status(400).json({ message: 'Informe um CPF válido com 11 dígitos.' });
+      return res.status(400).json({ meusBilhetes: [], message: 'CPF inválido.' });
     }
 
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     
-    // ATENÇÃO: COLE A SUA CHAVE ANON ENTRE AS ASPAS ABAIXO
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
+    // COLE SUA CHAVE ANON PUBLIC DO SUPABASE AQUI DENTRO DAS ASPAS:
+    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_PUBLIC_AQUI';
 
-    // Monta a máscara do CPF (ex: 123.456.789-00) para buscar em ambos os formatos
-    const cpfFormatado = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    // Formata o CPF para o padrão 000.000.000-00
+    const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
-    // Realiza a busca no Supabase filtrando tanto pelo CPF limpo quanto pelo formatado
-    const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${cpfFormatado})&order=created_at.desc&select=*`;
+    // Realiza a busca no Supabase testando:
+    // 1. CPF sem pontuação (ex: 12345678900)
+    // 2. CPF com pontuação (ex: 123.456.789-00)
+    const url = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf})&order=created_at.desc&select=*`;
 
-    const fetchResponse = await fetch(queryUrl, {
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -44,30 +38,27 @@ module.exports = async (req, res) => {
       }
     });
 
-    const responseText = await fetchResponse.text();
+    const dataText = await response.text();
 
-    if (!fetchResponse.ok) {
-      console.error('Erro na resposta do Supabase:', responseText);
-      return res.status(500).json({ 
-        message: 'Erro na consulta do banco de dados.', 
-        details: responseText 
-      });
+    if (!response.ok) {
+      console.error('Erro na resposta do Supabase:', dataText);
+      return res.status(500).json({ sucesso: false, message: 'Erro ao consultar banco de dados.' });
     }
 
-    let compras = [];
+    let registros = [];
     try {
-      compras = JSON.parse(responseText);
+      registros = JSON.parse(dataText);
     } catch (e) {
-      compras = [];
+      registros = [];
     }
 
     return res.status(200).json({
       sucesso: true,
-      compras: Array.isArray(compras) ? compras : []
+      compras: Array.isArray(registros) ? registros : []
     });
 
   } catch (err) {
-    console.error('Erro geral na API de bilhetes:', err);
-    return res.status(500).json({ message: 'Erro interno no servidor.' });
+    console.error('Erro geral na API:', err);
+    return res.status(500).json({ sucesso: false, message: 'Erro interno no servidor.' });
   }
 };
