@@ -1078,10 +1078,13 @@
             document.getElementById('pagina-meus-bilhetes').classList.add('hidden');
         }
 
-        async function exibirMeusBilhetesPorCpf(cpfLimpo) {
+        async function exibirMeusBilhetesPorCpf(cpfOriginal) {
             const containerBilhetes = document.getElementById('pagina-meus-bilhetes');
             const infoCpf = document.getElementById('resultado-cpf-info');
             const listaContainer = document.getElementById('lista-compras-container');
+
+            // Garante que enviará somente números na API
+            const cpfApenasNumeros = String(cpfOriginal).replace(/\D/g, '');
 
             infoCpf.innerHTML = 'Buscando bilhetes...';
             listaContainer.innerHTML = '';
@@ -1091,21 +1094,31 @@
                 const response = await fetch('/api/meus-bilhetes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cpf: cpfLimpo })
+                    body: JSON.stringify({ cpf: cpfApenasNumeros })
                 });
 
                 const data = await response.json();
+                console.log("Resposta da API de bilhetes:", data);
 
-                const cpfFormatado = cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                const cpfFormatado = cpfApenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
                 infoCpf.innerHTML = `Exibindo bilhetes para o CPF: <strong>${cpfFormatado}</strong>`;
 
-                if (data.sucesso && data.compras && data.compras.length > 0) {
+                // Captura a lista de compras aceitando variações comuns do backend
+                const listaCompras = data.compras || data.bilhetes || data.dados || [];
+
+                if ((data.sucesso || response.ok) && listaCompras.length > 0) {
                     let htmlCards = '';
-                    data.compras.forEach((compra, i) => {
-                        const statusClass = (compra.status === 'pago') ? 'pago' : 'pendente';
-                        const statusTexto = (compra.status === 'pago') ? 'Pago' : 'Pendente';
+                    listaCompras.forEach((compra, i) => {
+                        const statusNormalizado = (compra.status || '').toLowerCase();
+                        const statusClass = (statusNormalizado === 'pago' || statusNormalizado === 'approved') ? 'pago' : 'pendente';
+                        const statusTexto = (statusNormalizado === 'pago' || statusNormalizado === 'approved') ? 'Pago' : 'Pendente';
                         
-                        let cotas = Array.isArray(compra.numeros) ? compra.numeros : [compra.numeros];
+                        // Trata cotas/números como lista ou string
+                        let cotas = compra.numeros || compra.cotas || compra.bilhetes || [];
+                        if (!Array.isArray(cotas)) {
+                            cotas = [cotas];
+                        }
+                        
                         let cotasHtml = cotas.map(c => `<span class="cota-tag">${c}</span>`).join('');
 
                         htmlCards += `
@@ -1114,7 +1127,7 @@
                                     <span>Compra #${compra.id || (i + 1)}</span>
                                     <span class="badge-status ${statusClass}">${statusTexto}</span>
                                 </div>
-                                <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">Quantidade: ${compra.qtd} cotas</p>
+                                <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">Quantidade: ${compra.qtd || cotas.length} cotas</p>
                                 <div class="cotas-grid">
                                     ${cotasHtml}
                                 </div>
