@@ -26,19 +26,59 @@ module.exports = async (req, res) => {
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
-    // 1. Sorteio dos números das cotas
+    // 1. LISTA DE COTAS PREMIADAS BLOQUEADAS (Altere ou adicione aqui seus números premiados)
+    const COTAS_PREMIADAS = [
+      '003344', 
+      '001122', 
+      '25000', 
+      '005566', 
+      '49999'
+    ];
+
+    // 2. Busca bilhetes já vendidos no Supabase para não duplicar
+    let numerosJaVendidos = new Set(COTAS_PREMIADAS);
+    try {
+      const resVendidos = await fetch(`${SUPABASE_REST_URL}/bilhetes?select=numeros`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (resVendidos.ok) {
+        const dadosVendidos = await resVendidos.json();
+        dadosVendidos.forEach(item => {
+          if (item.numeros) {
+            item.numeros.split(',').forEach(n => numerosJaVendidos.add(n.trim()));
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Aviso ao consultar vendidos:', e);
+    }
+
+    // 3. Sorteio dos números das cotas (00000 a 49999 para 50k cotas)
     const quantidadeCotas = parseInt(qtd) || 1;
     const numerosSorteados = [];
-    while (numerosSorteados.length < quantidadeCotas) {
-      const num = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
-      if (!numerosSorteados.includes(num)) {
+    let tentativas = 0;
+    const MAX_TENTATIVAS = 20000;
+
+    while (numerosSorteados.length < quantidadeCotas && tentativas < MAX_TENTATIVAS) {
+      tentativas++;
+      const num = String(Math.floor(Math.random() * 50000)).padStart(5, '0');
+      
+      // Valida se não é premiada, não foi vendida antes e não foi sorteada na compra atual
+      if (!numerosJaVendidos.has(num) && !numerosSorteados.includes(num)) {
         numerosSorteados.push(num);
       }
     }
 
+    if (numerosSorteados.length < quantidadeCotas) {
+      return res.status(500).json({ message: 'Não há cotas suficientes disponíveis no momento.' });
+    }
+
     const numerosString = numerosSorteados.join(',');
 
-    // 2. Tenta gravar no Supabase (com fallback caso a coluna email não exista na tabela)
+    // 4. Grava no Supabase
     let payloadSupabase = {
       cpf: cleanCpf,
       telefone: cleanPhone,
@@ -60,7 +100,6 @@ module.exports = async (req, res) => {
       body: JSON.stringify(payloadSupabase)
     });
 
-    // Se der erro por falta do campo email na tabela, tenta novamente sem o e-mail
     if (!supaRes.ok) {
       delete payloadSupabase.email;
       supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
@@ -73,12 +112,9 @@ module.exports = async (req, res) => {
         },
         body: JSON.stringify(payloadSupabase)
       });
-      if (!supaRes.ok) {
-        console.error('Erro retornado pelo Supabase:', await supaRes.text());
-      }
     }
 
-    // 3. Comunicação com o Mercado Pago para geração do PIX
+    // 5. Gera cobrança no Mercado Pago
     const mpPayload = {
       transaction_amount: parseFloat(valor),
       description: `Rifa - ${quantidadeCotas} bilhete(s)`,
@@ -106,10 +142,8 @@ module.exports = async (req, res) => {
     const mpData = await mpRes.json();
 
     if (!mpRes.ok) {
-      console.error('Erro Mercado Pago:', mpData);
       return res.status(500).json({ 
-        message: mpData.message || 'Erro ao comunicar com o Mercado Pago.',
-        erro_detalhado: mpData
+        message: mpData.message || 'Erro ao comunicar com o Mercado Pago.'
       });
     }
 
