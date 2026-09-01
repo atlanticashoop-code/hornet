@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
-    // 1. Sorteio de números das cotas
+    // 1. Sorteio dos números das cotas
     const quantidadeCotas = parseInt(qtd) || 1;
     const numerosSorteados = [];
     while (numerosSorteados.length < quantidadeCotas) {
@@ -36,22 +36,34 @@ module.exports = async (req, res) => {
       }
     }
 
-    // 2. Gravação no Supabase
-    const payloadSupabase = {
+    const numerosString = numerosSorteados.join(',');
+
+    // 2. Tenta gravar no Supabase (com fallback caso a coluna email não exista na tabela)
+    let payloadSupabase = {
       cpf: cleanCpf,
       telefone: cleanPhone,
+      email: email,
       qtd: quantidadeCotas,
       valor: parseFloat(valor),
-      numeros: numerosSorteados.join(','),
+      numeros: numerosString,
       status: 'pago'
     };
 
-    if (email) {
-      payloadSupabase.email = email;
-    }
+    let supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(payloadSupabase)
+    });
 
-    try {
-      const supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
+    // Se der erro por falta do campo email na tabela, tenta novamente sem o e-mail
+    if (!supaRes.ok) {
+      delete payloadSupabase.email;
+      supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -61,16 +73,12 @@ module.exports = async (req, res) => {
         },
         body: JSON.stringify(payloadSupabase)
       });
-
       if (!supaRes.ok) {
-        const errText = await supaRes.text();
-        console.error('Erro na gravação do Supabase:', errText);
+        console.error('Erro retornado pelo Supabase:', await supaRes.text());
       }
-    } catch (e) {
-      console.error('Falha de conexão com Supabase:', e);
     }
 
-    // 3. Mercado Pago PIX
+    // 3. Comunicação com o Mercado Pago para geração do PIX
     const mpPayload = {
       transaction_amount: parseFloat(valor),
       description: `Rifa - ${quantidadeCotas} bilhete(s)`,
@@ -98,7 +106,7 @@ module.exports = async (req, res) => {
     const mpData = await mpRes.json();
 
     if (!mpRes.ok) {
-      console.error('Detalhes do erro no Mercado Pago:', mpData);
+      console.error('Erro Mercado Pago:', mpData);
       return res.status(500).json({ 
         message: mpData.message || 'Erro ao comunicar com o Mercado Pago.',
         erro_detalhado: mpData
