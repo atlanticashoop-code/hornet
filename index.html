@@ -19,19 +19,26 @@
           display: flex; align-items: center; justify-content: space-between;
           margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 15px;
         }
-        #btn-voltar-bilhetes {
-          background: #334155; color: #fff; border: none; padding: 8px 16px;
-          border-radius: 8px; cursor: pointer; font-weight: bold;
+        .btn-header-bilhete {
+          background: #334155; color: #fff; border: none; padding: 8px 14px;
+          border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.8rem;
         }
-        .cpf-info { font-size: 1.1rem; margin-bottom: 20px; color: #94a3b8; }
+        .btn-trocar-cpf {
+          background: var(--primary-yellow); color: #000; font-weight: 800;
+        }
+        .cpf-info-box {
+          display: flex; align-items: center; justify-content: space-between;
+          background: #1e293b; padding: 12px 16px; border-radius: 10px;
+          margin-bottom: 20px; border: 1px solid #334155;
+        }
+        .cpf-info { font-size: 0.95rem; color: #94a3b8; margin: 0; }
         .card-compra {
           background: #1e293b; border-radius: 12px; padding: 18px;
           margin-bottom: 15px; border: 1px solid #334155;
         }
-        .card-compra-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
-        .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; text-transform: uppercase; }
-        .badge-status.pago { background: #16a34a; color: #fff; }
-        .badge-status.pendente { background: #eab308; color: #000; }
+        .card-compra-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
+        .badge-status { padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; text-transform: uppercase; font-weight: 800; }
+        .badge-status.pago { background: #16a34a; color: #fff; border: 1px solid #22c55e; }
         .cotas-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .cota-tag { background: #2563eb; color: #fff; padding: 6px 12px; border-radius: 6px; font-family: monospace; font-weight: bold; }
 
@@ -275,17 +282,17 @@
         <button class="dock-btn-rds" id="btnDockPagar">PARTICIPAR 🍀</button>
     </div>
 
+    <!-- Modal Pix Limpo (Sem botão de ver bilhetes) -->
     <div class="modal-bg" id="modalPix">
         <div class="modal-body">
             <button class="modal-close" id="closePix">✕</button>
             <h3 style="color:var(--primary-yellow); font-weight:900;">PAGAMENTO PIX ⚡</h3>
-            <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 10px 0;">Escaneie o QR Code ou copie a chave Pix:</p>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 10px 0;">Escaneie o QR Code ou copie a chave Pix para finalizar:</p>
             
             <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code PIX">
 
             <input type="text" id="pixCode" readonly style="width:100%; padding:12px; background:#080a0e; border:1px solid var(--border-color); color:#fff; border-radius:8px; font-weight:700; text-align:center;">
             <button id="btnCopiar" class="btn-comprar-green">COPIAR CHAVE PIX</button>
-            <button id="btnVerMeusBilhetesModal" class="btn-meus-numeros" style="width:100%; margin-top:10px; padding:12px;">VER MEUS BILHETES</button>
         </div>
     </div>
 
@@ -317,13 +324,18 @@
         </div>
     </div>
 
+    <!-- Tela Completa de Bilhetes -->
     <section id="pagina-meus-bilhetes" class="container-bilhetes hidden">
       <div class="header-bilhetes">
-        <button id="btn-voltar-bilhetes" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
+        <button class="btn-header-bilhete" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
         <h2>Meus Bilhetes</h2>
       </div>
 
-      <div id="resultado-cpf-info" class="cpf-info"></div>
+      <div class="cpf-info-box">
+        <div id="resultado-cpf-info" class="cpf-info"></div>
+        <button class="btn-header-bilhete btn-trocar-cpf" id="btnTrocarCpf">🔍 CONSULTAR OUTRO CPF</button>
+      </div>
+
       <div id="lista-compras-container" class="lista-compras"></div>
     </section>
 
@@ -399,6 +411,12 @@
             if (cpfSalvo) { exibirMeusBilhetesPorCpf(cpfSalvo); } else { openModal(modalConsulta); }
         };
 
+        document.getElementById('btnTrocarCpf').onclick = () => {
+            fecharPaginaBilhetes();
+            document.getElementById('cpfSearch').value = '';
+            openModal(modalConsulta);
+        };
+
         document.getElementById('closeConsulta').onclick = () => modalConsulta.classList.remove('active');
         document.getElementById('navRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
         document.getElementById('footRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
@@ -418,12 +436,6 @@
             pixInput.select();
             navigator.clipboard.writeText(pixInput.value);
             alert('Chave PIX copiada com sucesso!');
-        };
-
-        document.getElementById('btnVerMeusBilhetesModal').onclick = () => {
-            modalPix.classList.remove('active');
-            const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
-            if (cpfSalvo) { exibirMeusBilhetesPorCpf(cpfSalvo); }
         };
 
         document.getElementById('btnDockPagar').onclick = () => {
@@ -462,14 +474,16 @@
             const cpfFormatado = cpfApenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
             infoCpf.innerHTML = 'Buscando bilhetes...';
-            listaContainer.innerHTML = '';
+            listaContainer.innerHTML = '<div class="card-compra"><p>Carregando seus números...</p></div>';
             containerBilhetes.classList.remove('hidden');
 
+            await new Promise(resolve => setTimeout(resolve, 400));
+
             try {
-                const response = await fetch(`/api/meus-bilhetes?cpf=${cpfApenasNumeros}`);
+                const response = await fetch(`/api/meus-bilhetes?cpf=${cpfApenasNumeros}&t=${Date.now()}`);
                 const data = await response.json();
 
-                infoCpf.innerHTML = `Exibindo bilhetes para o CPF: <strong>${cpfFormatado}</strong>`;
+                infoCpf.innerHTML = `CPF: <strong>${cpfFormatado}</strong>`;
 
                 let listaCompras = [];
                 if (Array.isArray(data)) {
@@ -481,9 +495,6 @@
                 if (listaCompras.length > 0) {
                     let htmlCards = '';
                     listaCompras.forEach((compra, i) => {
-                        const statusClass = 'pago';
-                        const statusTexto = 'Pago';
-                        
                         let cotas = compra.numeros || compra.cotas || compra.bilhetes || compra.numbers || [];
                         
                         if (typeof cotas === 'string') {
@@ -505,8 +516,8 @@
                         htmlCards += `
                             <div class="card-compra">
                                 <div class="card-compra-header">
-                                    <span>Compra #${compra.id || compra.codigo || (i + 1)}</span>
-                                    <span class="badge-status ${statusClass}">${statusTexto}</span>
+                                    <span>Compra #${compra.id || (i + 1)}</span>
+                                    <span class="badge-status pago">PAGO</span>
                                 </div>
                                 <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">Quantidade: ${compra.qtd || cotas.length} cotas</p>
                                 <div class="cotas-grid">
@@ -594,8 +605,7 @@
                         }
                         modalPix.classList.add('active');
                     } else {
-                        alert('Pix gerado com sucesso! Seus bilhetes foram cadastrados.');
-                        exibirMeusBilhetesPorCpf(cpf);
+                        alert('Pix gerado com sucesso!');
                     }
                 } else {
                     alert('Erro ao gerar Pix: ' + (data.message || data.erro || 'Verifique os dados informados.'));
