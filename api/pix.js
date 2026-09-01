@@ -36,7 +36,20 @@ module.exports = async (req, res) => {
       }
     }
 
-    // 2. Gravação no Supabase (salvando com status "pago" e incluindo o e-mail)
+    // 2. Gravação no Supabase (formato flexível)
+    const payloadSupabase = {
+      cpf: cleanCpf,
+      telefone: cleanPhone,
+      qtd: quantidadeCotas,
+      valor: parseFloat(valor),
+      numeros: numerosSorteados.join(','), // Salva como string separada por vírgulas para não dar conflito de tipo
+      status: 'pago'
+    };
+
+    if (email) {
+      payloadSupabase.email = email;
+    }
+
     try {
       const supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
         method: 'POST',
@@ -46,20 +59,12 @@ module.exports = async (req, res) => {
           'Content-Type': 'application/json',
           'Prefer': 'return=representation'
         },
-        body: JSON.stringify({
-          email: email || `cliente${cleanCpf}@suarifa.com`,
-          cpf: cleanCpf,
-          telefone: cleanPhone,
-          qtd: quantidadeCotas,
-          valor: parseFloat(valor),
-          numeros: JSON.stringify(numerosSorteados),
-          status: 'pago'
-        })
+        body: JSON.stringify(payloadSupabase)
       });
 
       if (!supaRes.ok) {
-        const supaErrorText = await supaRes.text();
-        console.error('Erro na gravação do Supabase:', supaErrorText);
+        const errText = await supaRes.text();
+        console.error('Erro na gravação do Supabase:', errText);
       }
     } catch (e) {
       console.error('Falha de conexão com Supabase:', e);
