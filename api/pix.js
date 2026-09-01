@@ -1,5 +1,4 @@
 module.exports = async (req, res) => {
-  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
@@ -10,6 +9,7 @@ module.exports = async (req, res) => {
 
   try {
     const body = req.body || {};
+    const email = String(body.email || '').trim();
     const cpf = body.cpf;
     const telefone = body.telefone || body.whatsapp || body.phone;
     const valor = body.valor || body.valorTotal || body.amount;
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
       }
     }
 
-    // 2. Gravação no Supabase
+    // 2. Gravação no Supabase (salvando com status "pago" e incluindo o e-mail)
     try {
       const supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
         method: 'POST',
@@ -47,12 +47,13 @@ module.exports = async (req, res) => {
           'Prefer': 'return=representation'
         },
         body: JSON.stringify({
+          email: email || `cliente${cleanCpf}@suarifa.com`,
           cpf: cleanCpf,
           telefone: cleanPhone,
           qtd: quantidadeCotas,
           valor: parseFloat(valor),
           numeros: JSON.stringify(numerosSorteados),
-          status: 'pendente'
+          status: 'pago'
         })
       });
 
@@ -70,7 +71,7 @@ module.exports = async (req, res) => {
       description: `Rifa - ${quantidadeCotas} bilhete(s)`,
       payment_method_id: 'pix',
       payer: {
-        email: `cliente${cleanCpf}@suarifa.com`,
+        email: email || `cliente${cleanCpf}@suarifa.com`,
         first_name: 'Cliente',
         identification: {
           type: 'CPF',
