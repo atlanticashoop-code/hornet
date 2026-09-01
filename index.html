@@ -461,24 +461,10 @@
             containerBilhetes.classList.remove('hidden');
 
             try {
-                // Tenta chamar a API do backend
-                let response = await fetch('/api/meus-bilhetes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cpf: cpfApenasNumeros, documento: cpfApenasNumeros })
-                });
+                // Requisição via GET enviando o CPF na URL
+                const response = await fetch(`/api/meus-bilhetes?cpf=${cpfApenasNumeros}`);
 
-                if (!response.ok && response.status !== 404) {
-                    response = await fetch(`/api/meus-bilhetes?cpf=${cpfApenasNumeros}`);
-                }
-
-                const textoResposta = await response.text();
-                let data = {};
-                try {
-                    data = JSON.parse(textoResposta);
-                } catch(e) {
-                    alert('Resposta do Servidor (Não é JSON):\n' + textoResposta);
-                }
+                const data = await response.json();
 
                 infoCpf.innerHTML = `Exibindo bilhetes para o CPF: <strong>${cpfFormatado}</strong>`;
 
@@ -519,12 +505,10 @@
                     });
                     listaContainer.innerHTML = htmlCards;
                 } else {
-                    alert('Servidor respondeu, mas não encontrou bilhetes para o CPF. Retorno do Servidor: ' + JSON.stringify(data));
                     listaContainer.innerHTML = '<div class="card-compra"><p>Nenhum bilhete encontrado para este CPF.</p></div>';
                 }
             } catch (err) {
-                alert('Erro na requisição ao servidor:\n' + err.message);
-                listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro ao carregar bilhetes.</p></div>';
+                listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro ao carregar bilhetes. Verifique sua conexão.</p></div>';
             }
         }
 
@@ -598,7 +582,7 @@
                         exibirMeusBilhetesPorCpf(cpf);
                     }
                 } else {
-                    alert('Erro ao gerar Pix: ' + (data.message || data.erro || JSON.stringify(data)));
+                    alert('Erro ao gerar Pix: ' + (data.message || data.erro || 'Verifique os dados informados.'));
                 }
             } catch (error) {
                 alert('Erro de conexão ao gerar Pix: ' + error.message);
