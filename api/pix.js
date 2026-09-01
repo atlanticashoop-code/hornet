@@ -26,12 +26,12 @@ module.exports = async (req, res) => {
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
-    // 1. LISTA DE COTAS PREMIADAS BLOQUEADAS (Altere ou adicione aqui seus números premiados)
+    // 1. LISTA DE COTAS PREMIADAS BLOQUEADAS
     const COTAS_PREMIADAS = [
-      '003344', 
-      '001122', 
+      '07777', 
+      '12345', 
       '25000', 
-      '005566', 
+      '33333', 
       '49999'
     ];
 
@@ -66,7 +66,6 @@ module.exports = async (req, res) => {
       tentativas++;
       const num = String(Math.floor(Math.random() * 50000)).padStart(5, '0');
       
-      // Valida se não é premiada, não foi vendida antes e não foi sorteada na compra atual
       if (!numerosJaVendidos.has(num) && !numerosSorteados.includes(num)) {
         numerosSorteados.push(num);
       }
@@ -152,6 +151,7 @@ module.exports = async (req, res) => {
 
     return res.status(200).json({
       sucesso: true,
+      payment_id: mpData.id,
       qr_code: qrCode,
       pix_copia_cola: qrCode,
       qr_code_base64: qrCodeBase64,
