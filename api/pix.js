@@ -1,4 +1,5 @@
 module.exports = async (req, res) => {
+  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
@@ -8,7 +9,11 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Método não permitido.' });
 
   try {
-    const { cpf, telefone, valor, qtd } = req.body || {};
+    const body = req.body || {};
+    const cpf = body.cpf;
+    const telefone = body.telefone || body.whatsapp || body.phone;
+    const valor = body.valor || body.valorTotal || body.amount;
+    const qtd = body.qtd;
 
     const cleanCpf = String(cpf || '').replace(/\D/g, '');
     const cleanPhone = String(telefone || '').replace(/\D/g, '');
@@ -21,7 +26,7 @@ module.exports = async (req, res) => {
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
-    // 1. Gera os números das cotas aleatoriamente
+    // 1. Sorteio de números das cotas
     const quantidadeCotas = parseInt(qtd) || 1;
     const numerosSorteados = [];
     while (numerosSorteados.length < quantidadeCotas) {
@@ -31,7 +36,7 @@ module.exports = async (req, res) => {
       }
     }
 
-    // 2. Grava no Supabase
+    // 2. Gravação no Supabase
     try {
       const supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
         method: 'POST',
@@ -46,7 +51,7 @@ module.exports = async (req, res) => {
           telefone: cleanPhone,
           qtd: quantidadeCotas,
           valor: parseFloat(valor),
-          numeros: numerosSorteados,
+          numeros: JSON.stringify(numerosSorteados),
           status: 'pendente'
         })
       });
@@ -59,7 +64,7 @@ module.exports = async (req, res) => {
       console.error('Falha de conexão com Supabase:', e);
     }
 
-    // 3. Monta a requisição para o Mercado Pago
+    // 3. Comunicação com Mercado Pago
     const mpPayload = {
       transaction_amount: parseFloat(valor),
       description: `Rifa - ${quantidadeCotas} bilhete(s)`,
@@ -100,6 +105,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       sucesso: true,
       qr_code: qrCode,
+      pix_copia_cola: qrCode,
       qr_code_base64: qrCodeBase64,
       numeros: numerosSorteados
     });
