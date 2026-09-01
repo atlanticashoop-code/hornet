@@ -10,8 +10,8 @@ module.exports = async (req, res) => {
     const rawCpf = req.query.cpf || (req.body && req.body.cpf) ? String(req.query.cpf || req.body.cpf).trim() : '';
     const cleanCpf = rawCpf.replace(/\D/g, '');
 
-    if (!cleanCpf || cleanCpf.length !== 11) {
-      return res.status(400).json({ sucesso: false, message: 'Por favor, informe um CPF válido com 11 dígitos.' });
+    if (!cleanCpf) {
+      return res.status(200).json([]);
     }
 
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
     const responseText = await fetchResponse.text();
 
     if (!fetchResponse.ok) {
-      return res.status(500).json([]);
+      return res.status(200).json([]);
     }
 
     let compras = [];
@@ -43,10 +43,9 @@ module.exports = async (req, res) => {
       compras = [];
     }
 
-    // Retorna a lista diretamente
     return res.status(200).json(Array.isArray(compras) ? compras : []);
 
   } catch (err) {
-    return res.status(500).json([]);
+    return res.status(200).json([]);
   }
 };
