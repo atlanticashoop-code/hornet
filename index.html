@@ -461,9 +461,7 @@
             containerBilhetes.classList.remove('hidden');
 
             try {
-                // Requisição via GET enviando o CPF na URL
                 const response = await fetch(`/api/meus-bilhetes?cpf=${cpfApenasNumeros}`);
-
                 const data = await response.json();
 
                 infoCpf.innerHTML = `Exibindo bilhetes para o CPF: <strong>${cpfFormatado}</strong>`;
@@ -484,11 +482,22 @@
                         const statusTexto = isPago ? 'Pago' : 'Pendente';
                         
                         let cotas = compra.numeros || compra.cotas || compra.bilhetes || compra.numbers || [];
-                        if (!Array.isArray(cotas)) {
-                            cotas = typeof cotas === 'string' ? cotas.split(',') : [cotas];
+                        
+                        if (typeof cotas === 'string') {
+                            try {
+                                const parsed = JSON.parse(cotas);
+                                cotas = Array.isArray(parsed) ? parsed : cotas.split(',');
+                            } catch (e) {
+                                cotas = cotas.split(',');
+                            }
+                        } else if (!Array.isArray(cotas)) {
+                            cotas = [cotas];
                         }
                         
-                        let cotasHtml = cotas.map(c => `<span class="cota-tag">${String(c).trim()}</span>`).join('');
+                        let cotasHtml = cotas
+                            .filter(c => String(c).trim() !== '')
+                            .map(c => `<span class="cota-tag">${String(c).trim()}</span>`)
+                            .join('');
 
                         htmlCards += `
                             <div class="card-compra">
@@ -508,6 +517,7 @@
                     listaContainer.innerHTML = '<div class="card-compra"><p>Nenhum bilhete encontrado para este CPF.</p></div>';
                 }
             } catch (err) {
+                console.error("Erro na busca de bilhetes:", err);
                 listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro ao carregar bilhetes. Verifique sua conexão.</p></div>';
             }
         }
@@ -562,7 +572,7 @@
 
                 if (response.ok && (data.sucesso || data.qr_code || data.pix_copia_cola || data.pix)) {
                     const pixCopiaECola = data.qr_code || data.pix_copia_cola || data.qrcode || data.pix;
-                    const qrCodeImg = data.qr_code_base64 || data.qr_code_url || data.image_url || data.qr_code;
+                    const qrCodeImg = data.qr_code_base64 || data.qr_code_url || data.image_url;
 
                     localStorage.setItem('ultimoCpfConsultado', cpf);
 
@@ -585,6 +595,7 @@
                     alert('Erro ao gerar Pix: ' + (data.message || data.erro || 'Verifique os dados informados.'));
                 }
             } catch (error) {
+                console.error("Erro no envio:", error);
                 alert('Erro de conexão ao gerar Pix: ' + error.message);
             } finally {
                 btnSubmit.innerText = 'PAGAR COM PIX AGORA 🍀';
