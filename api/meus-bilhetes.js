@@ -5,14 +5,8 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, apikey');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  
-  // Permite GET e POST
-  if (req.method !== 'GET' && req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método não permitido.' });
-  }
 
   try {
-    // Captura o CPF via query (GET) ou via body (POST)
     const rawCpf = req.query.cpf || (req.body && req.body.cpf) ? String(req.query.cpf || req.body.cpf).trim() : '';
     const cleanCpf = rawCpf.replace(/\D/g, '');
 
@@ -24,9 +18,9 @@ module.exports = async (req, res) => {
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
     const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    const partialCpf = cleanCpf.substring(0, 9) + '-' + cleanCpf.substring(9);
 
-    const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf},cpf.eq.${partialCpf},cpf.ilike.%${cleanCpf}%)&order=created_at.desc&select=*`;
+    // Consulta buscando no Supabase por qualquer variação do CPF na coluna 'cpf'
+    const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf},cpf.ilike.%${cleanCpf}%)&order=created_at.desc&select=*`;
 
     const fetchResponse = await fetch(queryUrl, {
       method: 'GET',
@@ -40,8 +34,8 @@ module.exports = async (req, res) => {
     const responseText = await fetchResponse.text();
 
     if (!fetchResponse.ok) {
-      console.error('Erro no Supabase:', responseText);
-      return res.status(500).json({ sucesso: false, message: 'Erro ao consultar banco de dados.' });
+      console.error('Erro de permissão/resposta do Supabase:', responseText);
+      return res.status(500).json({ sucesso: false, message: 'Erro ao consultar banco de dados.', detalhe: responseText });
     }
 
     let compras = [];
@@ -53,11 +47,12 @@ module.exports = async (req, res) => {
 
     return res.status(200).json({
       sucesso: true,
+      total_encontrado: compras.length,
       compras: Array.isArray(compras) ? compras : []
     });
 
   } catch (err) {
-    console.error('Erro na API meus-bilhetes:', err);
+    console.error('Erro interno:', err);
     return res.status(500).json({ sucesso: false, message: 'Erro interno no servidor.' });
   }
 };
