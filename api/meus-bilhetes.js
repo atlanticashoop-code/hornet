@@ -1,5 +1,4 @@
 module.exports = async (req, res) => {
-  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
@@ -8,7 +7,6 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // Captura o CPF enviado via GET (query) ou POST (body)
     const rawCpf = req.query.cpf || (req.body && req.body.cpf) ? String(req.query.cpf || req.body.cpf).trim() : '';
     const cleanCpf = rawCpf.replace(/\D/g, '');
 
@@ -19,10 +17,8 @@ module.exports = async (req, res) => {
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
-    // CPF formatado com pontuação (000.000.000-00)
     const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
-    // Consulta no Supabase cobrando variações com ou sem pontuação
     const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf},cpf.ilike.%25${cleanCpf}%25)&order=created_at.desc&select=*`;
 
     const fetchResponse = await fetch(queryUrl, {
@@ -52,11 +48,9 @@ module.exports = async (req, res) => {
       return res.status(200).json([]);
     }
 
-    // Normaliza o retorno dos dados para garantir compatibilidade no front-end
     const comprasTratadas = compras.map(item => {
       let numerosTratados = item.numeros || item.cotas || [];
 
-      // Converte string de números em array se necessário
       if (typeof numerosTratados === 'string') {
         try {
           const parsed = JSON.parse(numerosTratados);
@@ -68,6 +62,7 @@ module.exports = async (req, res) => {
 
       return {
         ...item,
+        status: 'pago',
         numeros: Array.isArray(numerosTratados) 
           ? numerosTratados.map(n => String(n).trim()).filter(n => n !== '') 
           : []
