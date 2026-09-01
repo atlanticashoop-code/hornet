@@ -70,6 +70,7 @@
         .drawer-close { background: transparent; border: none; color: var(--text-sub); font-size: 1.5rem; cursor: pointer; }
         .drawer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
         .drawer-links li a { color: var(--text-main); text-decoration: none; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; }
+        .drawer-links li a:hover { background: #1a202c; }
 
         .main-container { width: 100%; max-width: 480px; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
         .card-rifa { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-main); overflow: hidden; }
@@ -155,6 +156,7 @@
         <ul class="drawer-links">
             <li><a href="#" id="navInicio">🏠 Início</a></li>
             <li><a href="#" id="navMeusBilhetes">🎫 Meus Bilhetes</a></li>
+            <li><a href="#" id="navSuporte">💬 Suporte</a></li>
             <li><a href="#" id="navRegulamento">📜 Regulamento</a></li>
             <li><a href="#" id="navTermos">⚖️ Termos de Uso</a></li>
         </ul>
@@ -312,6 +314,18 @@
         </div>
     </div>
 
+    <div class="modal-bg" id="modalSuporte">
+        <div class="modal-body">
+            <button class="modal-close" id="closeSuporte">✕</button>
+            <h3 style="color:var(--primary-yellow); font-weight:900;">SUPORTE DA RIFA</h3>
+            <p style="font-size:0.9rem; color:var(--text-sub); margin-top:14px; text-align:center;">Precisa de ajuda com suas cotas ou dúvidas sobre o sorteio?</p>
+            <div style="background:#080a0e; padding:15px; border-radius:10px; border:1px solid var(--border-color); margin-top:15px; word-break: break-all;">
+                <span style="font-weight:bold; color:var(--primary-yellow); font-size:0.85rem;">E-MAIL DE CONTATO:</span><br>
+                <a href="mailto:corujapremios@gmail.com" style="color:#fff; text-decoration:none; font-weight:800; font-size:1.05rem;">corujapremios@gmail.com</a>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-bg" id="modalRegulamento">
         <div class="modal-body">
             <button class="modal-close" id="closeRegulamento">✕</button>
@@ -399,6 +413,7 @@
         drawerOverlay.onclick = closeDrawer;
 
         const modalConsulta = document.getElementById('modalConsulta');
+        const modalSuporte = document.getElementById('modalSuporte');
         const modalRegulamento = document.getElementById('modalRegulamento');
         const modalTermos = document.getElementById('modalTermos');
         const modalPix = document.getElementById('modalPix');
@@ -423,6 +438,10 @@
         };
 
         document.getElementById('closeConsulta').onclick = () => modalConsulta.classList.remove('active');
+
+        document.getElementById('navSuporte').onclick = (e) => { e.preventDefault(); openModal(modalSuporte); };
+        document.getElementById('closeSuporte').onclick = () => modalSuporte.classList.remove('active');
+
         document.getElementById('navRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
         document.getElementById('footRegulamento').onclick = (e) => { e.preventDefault(); openModal(modalRegulamento); };
         document.getElementById('closeRegulamento').onclick = () => modalRegulamento.classList.remove('active');
@@ -477,23 +496,30 @@
         function iniciarMonitoramentoPagamento(paymentId, cpfCliente, numerosComprados) {
             if (monitoramentoInterval) clearInterval(monitoramentoInterval);
 
-            monitoramentoInterval = setInterval(async () => {
+            async function checarStatus() {
                 try {
                     const res = await fetch(`/api/status?payment_id=${paymentId}`);
                     const data = await res.json();
 
-                    if (data.status === 'approved') {
+                    if (data.status === 'approved' || data.approved) {
                         clearInterval(monitoramentoInterval);
                         modalPix.classList.remove('active');
                         
-                        alert(`🎉 PAGAMENTO CONFIRMADO COM SUCESSO!\n\nSeus bilhetes gerados:\n${numerosComprados.join(' - ')}`);
-                        
+                        alert(`🎉 PAGAMENTO CONFIRMADO COM SUCESSO!\n\nSeus bilhetes foram liberados com sucesso!`);
                         exibirMeusBilhetesPorCpf(cpfCliente);
                     }
                 } catch (err) {
                     console.log('Aguardando pagamento...');
                 }
-            }, 3000);
+            }
+
+            monitoramentoInterval = setInterval(checarStatus, 3000);
+
+            document.addEventListener("visibilitychange", function() {
+                if (!document.hidden && modalPix.classList.contains('active')) {
+                    checarStatus();
+                }
+            });
         }
 
         async function exibirMeusBilhetesPorCpf(cpfOriginal) {
