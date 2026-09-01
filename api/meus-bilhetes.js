@@ -5,11 +5,15 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, apikey');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ message: 'Método não permitido.' });
+  
+  // Permite GET e POST
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ message: 'Método não permitido.' });
+  }
 
   try {
-    const body = req.body || {};
-    const rawCpf = body.cpf ? String(body.cpf).trim() : '';
+    // Captura o CPF via query (GET) ou via body (POST)
+    const rawCpf = req.query.cpf || (req.body && req.body.cpf) ? String(req.query.cpf || req.body.cpf).trim() : '';
     const cleanCpf = rawCpf.replace(/\D/g, '');
 
     if (!cleanCpf || cleanCpf.length !== 11) {
@@ -17,17 +21,11 @@ module.exports = async (req, res) => {
     }
 
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
-    
-    // COLE SUA CHAVE "anon public" DO SUPABASE ENTRE AS ASPAS:
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
-    // Monta o formato com pontos e traço (ex: 123.456.789-00)
     const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-
-    // Monta o formato apenas com traço no final (ex: 123456789-00)
     const partialCpf = cleanCpf.substring(0, 9) + '-' + cleanCpf.substring(9);
 
-    // Consulta no Supabase aceitando qualquer uma das variações de salvamento em colunas do tipo text
     const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf},cpf.eq.${partialCpf},cpf.ilike.%${cleanCpf}%)&order=created_at.desc&select=*`;
 
     const fetchResponse = await fetch(queryUrl, {
