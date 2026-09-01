@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
     const responseText = await fetchResponse.text();
 
     if (!fetchResponse.ok) {
-      console.error('Erro na resposta do Supabase:', responseText);
+      console.error('Erro Supabase Busca:', responseText);
       return res.status(200).json([]);
     }
 
@@ -73,7 +73,7 @@ module.exports = async (req, res) => {
     return res.status(200).json(comprasTratadas);
 
   } catch (err) {
-    console.error('Erro interno na Serverless Function:', err);
+    console.error('Erro interno ao buscar bilhetes:', err);
     return res.status(200).json([]);
   }
 };
