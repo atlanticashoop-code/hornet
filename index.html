@@ -9,692 +9,124 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        /* Estilos da Tela de Meus Bilhetes */
         .container-bilhetes {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background-color: #0f172a;
-          color: #ffffff;
-          z-index: 9999;
-          overflow-y: auto;
-          padding: 20px;
-          box-sizing: border-box;
+          position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+          background-color: #0f172a; color: #ffffff; z-index: 9999;
+          overflow-y: auto; padding: 20px; box-sizing: border-box;
         }
-
-        .container-bilhetes.hidden {
-          display: none !important;
-        }
-
+        .container-bilhetes.hidden { display: none !important; }
         .header-bilhetes {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 25px;
-          border-bottom: 1px solid #334155;
-          padding-bottom: 15px;
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 15px;
         }
-
         #btn-voltar-bilhetes {
-          background: #334155;
-          color: #fff;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: bold;
+          background: #334155; color: #fff; border: none; padding: 8px 16px;
+          border-radius: 8px; cursor: pointer; font-weight: bold;
         }
-
-        .cpf-info {
-          font-size: 1.1rem;
-          margin-bottom: 20px;
-          color: #94a3b8;
-        }
-
+        .cpf-info { font-size: 1.1rem; margin-bottom: 20px; color: #94a3b8; }
         .card-compra {
-          background: #1e293b;
-          border-radius: 12px;
-          padding: 18px;
-          margin-bottom: 15px;
-          border: 1px solid #334155;
+          background: #1e293b; border-radius: 12px; padding: 18px;
+          margin-bottom: 15px; border: 1px solid #334155;
         }
-
-        .card-compra-header {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 10px;
-          font-weight: bold;
-        }
-
-        .badge-status {
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          text-transform: uppercase;
-        }
+        .card-compra-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
+        .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; text-transform: uppercase; }
         .badge-status.pago { background: #16a34a; color: #fff; }
         .badge-status.pendente { background: #eab308; color: #000; }
-
-        .cotas-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 10px;
-        }
-
-        .cota-tag {
-          background: #2563eb;
-          color: #fff;
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-family: monospace;
-          font-weight: bold;
-        }
+        .cotas-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .cota-tag { background: #2563eb; color: #fff; padding: 6px 12px; border-radius: 6px; font-family: monospace; font-weight: bold; }
 
         :root {
-            --bg-body: #0a0c10;
-            --bg-card: #121620;
-            --bg-card-hover: #1a202c;
-            --border-color: #232d3f;
-            --primary-yellow: #ffc107;
-            --primary-green: #00e676;
-            --neon-green: #39ff14;
-            --text-main: #ffffff;
-            --text-sub: #a0aec0;
-            --radius-main: 14px;
+            --bg-body: #0a0c10; --bg-card: #121620; --border-color: #232d3f;
+            --primary-yellow: #ffc107; --primary-green: #00e676; --neon-green: #39ff14;
+            --text-main: #ffffff; --text-sub: #a0aec0; --radius-main: 14px;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-body); color: var(--text-main); padding-top: 65px; padding-bottom: 80px; display: flex; flex-direction: column; align-items: center; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            padding-top: 65px;
-            padding-bottom: 80px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* TOPO COM MENU NA DIREITA */
         .rds-header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 62px;
-            background: #06080c;
-            border-bottom: 2px solid var(--primary-yellow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 16px;
-            z-index: 100;
+            position: fixed; top: 0; left: 0; right: 0; height: 62px;
+            background: #06080c; border-bottom: 2px solid var(--primary-yellow);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 16px; z-index: 100;
         }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .brand-logo { font-weight: 900; font-size: 1.15rem; color: var(--neon-green); text-shadow: 0 0 10px rgba(57, 255, 20, 0.6); display: flex; align-items: center; gap: 6px; }
+        .menu-btn-hamburger { background: transparent; border: none; color: var(--primary-yellow); font-size: 1.6rem; cursor: pointer; }
+        .btn-meus-numeros { background: var(--primary-yellow); color: #000; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; cursor: pointer; }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; }
+        .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+        .drawer-menu { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #0d1117; border-left: 1px solid var(--border-color); z-index: 201; transition: right 0.3s ease; padding: 20px; display: flex; flex-direction: column; }
+        .drawer-menu.active { right: 0; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+        .drawer-header h3 { color: var(--primary-yellow); font-weight: 900; font-size: 1.1rem; }
+        .drawer-close { background: transparent; border: none; color: var(--text-sub); font-size: 1.5rem; cursor: pointer; }
+        .drawer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .drawer-links li a { color: var(--text-main); text-decoration: none; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .main-container { width: 100%; max-width: 480px; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+        .card-rifa { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-main); overflow: hidden; }
 
-        .brand-logo {
-            font-weight: 900;
-            font-size: 1.15rem;
-            color: var(--neon-green);
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 10px rgba(57, 255, 20, 0.6);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .menu-btn-hamburger {
-            background: transparent;
-            border: none;
-            color: var(--primary-yellow);
-            font-size: 1.6rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-meus-numeros {
-            background: var(--primary-yellow);
-            color: #000;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 800;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-
-        /* MENU GAVETA LATERAL */
-        .drawer-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 200;
-        }
-
-        .drawer-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .drawer-menu {
-            position: fixed;
-            top: 0;
-            right: -280px;
-            width: 280px;
-            height: 100%;
-            background: #0d1117;
-            border-left: 1px solid var(--border-color);
-            z-index: 201;
-            transition: right 0.3s ease;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .drawer-menu.active {
-            right: 0;
-        }
-
-        .drawer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .drawer-header h3 {
-            color: var(--primary-yellow);
-            font-weight: 900;
-            font-size: 1.1rem;
-        }
-
-        .drawer-close {
-            background: transparent;
-            border: none;
-            color: var(--text-sub);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .drawer-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .drawer-links li a {
-            color: var(--text-main);
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .drawer-links li a:hover {
-            background: var(--bg-card);
-            color: var(--primary-yellow);
-        }
-
-        /* CONTAINER PRINCIPAL */
-        .main-container {
-            width: 100%;
-            max-width: 480px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .card-rifa {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-main);
-            overflow: hidden;
-        }
-
-        /* CARROSSEL DE FOTOS */
-        .banner-container {
-            position: relative;
-            width: 100%;
-            height: 280px;
-            background-color: #000;
-            overflow: hidden;
-        }
-
-        .carousel-track {
-            display: flex;
-            width: 200%;
-            height: 100%;
-            transition: transform 0.4s ease-in-out;
-        }
-
-        .banner-img {
-            width: 50%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            image-rendering: -webkit-optimize-contrast;
-        }
-
-        .carousel-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            border: 1px solid var(--border-color);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .carousel-btn.prev { left: 10px; }
-        .carousel-btn.next { right: 10px; }
-
-        .carousel-dots {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 10;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            transition: background 0.3s, width 0.3s;
-        }
-
-        .dot.active {
-            background: var(--primary-yellow);
-            width: 22px;
-            border-radius: 10px;
-        }
-
-        .tag-status {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: #e53e3e;
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            z-index: 10;
-        }
+        .banner-container { position: relative; width: 100%; height: 280px; background-color: #000; overflow: hidden; }
+        .carousel-track { display: flex; width: 200%; height: 100%; transition: transform 0.4s ease-in-out; }
+        .banner-img { width: 50%; height: 100%; object-fit: cover; object-position: center; }
+        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--border-color); width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .carousel-btn.prev { left: 10px; } .carousel-btn.next { right: 10px; }
+        .carousel-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
+        .dot.active { background: var(--primary-yellow); width: 22px; border-radius: 10px; }
+        .tag-status { position: absolute; top: 12px; left: 12px; background: #e53e3e; color: #fff; font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; z-index: 10; }
 
         .rifa-content { padding: 16px; }
         .rifa-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; }
         .rifa-subtitle { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 14px; }
-
-        .progress-box {
-            background: #080a0e;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 14px;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.78rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text-sub);
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 10px;
-            background: #1a202c;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            width: 78%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-yellow) 0%, var(--primary-green) 100%);
-        }
-
-        .price-tag-rds {
-            background: rgba(0, 230, 118, 0.1);
-            border: 1px solid var(--primary-green);
-            border-radius: 10px;
-            padding: 10px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .price-tag-rds span { font-size: 0.85rem; color: var(--text-sub); font-weight: 600; }
+        .progress-box { background: #080a0e; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 14px; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; margin-bottom: 6px; color: var(--text-sub); }
+        .progress-bar-bg { width: 100%; height: 10px; background: #1a202c; border-radius: 5px; overflow: hidden; }
+        .progress-bar-fill { width: 78%; height: 100%; background: linear-gradient(90deg, var(--primary-yellow) 0%, var(--primary-green) 100%); }
+        .price-tag-rds { background: rgba(0, 230, 118, 0.1); border: 1px solid var(--primary-green); border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
         .price-tag-rds strong { font-size: 1.3rem; color: var(--primary-green); font-weight: 900; }
 
-        /* COTAS PREMIADAS */
-        .cotas-premiadas-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-main);
-            padding: 16px;
-        }
+        .cotas-premiadas-card, .selecao-cotas-card, .checkout-card-rds { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-main); padding: 16px; }
+        .section-title { font-size: 1rem; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .cotas-badges { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+        .badge-numero { background: #1a202c; border: 1px solid var(--primary-yellow); color: var(--primary-yellow); padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; white-space: nowrap; }
 
-        .section-title {
-            font-size: 1rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cotas-badges {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 6px;
-        }
-
-        .badge-numero {
-            background: #1a202c;
-            border: 1px solid var(--primary-yellow);
-            color: var(--primary-yellow);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: 800;
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-
-        /* SELEÇÃO DE COTAS */
-        .selecao-cotas-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-main);
-            padding: 16px;
-        }
-
-        .grid-rapida {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        .btn-cota-rds {
-            background: #161b26;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .btn-cota-rds.active {
-            border-color: var(--primary-green);
-            background: rgba(0, 230, 118, 0.08);
-        }
-
+        .grid-rapida { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+        .btn-cota-rds { background: #161b26; border: 2px solid var(--border-color); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; }
+        .btn-cota-rds.active { border-color: var(--primary-green); background: rgba(0, 230, 118, 0.08); }
         .btn-cota-rds .qtd { font-size: 1.4rem; font-weight: 900; color: #fff; }
-        .btn-cota-rds .lbl { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; font-weight: 700; }
-        .btn-cota-rds .val { font-size: 0.85rem; font-weight: 800; color: var(--primary-green); margin-top: 2px; }
+        .btn-cota-rds .val { font-size: 0.85rem; font-weight: 800; color: var(--primary-green); }
+        .pop-tag { position: absolute; top: -10px; background: var(--primary-yellow); color: #000; font-size: 0.6rem; font-weight: 900; padding: 2px 8px; border-radius: 10px; }
 
-        .pop-tag {
-            position: absolute;
-            top: -10px;
-            background: var(--primary-yellow);
-            color: #000;
-            font-size: 0.6rem;
-            font-weight: 900;
-            padding: 2px 8px;
-            border-radius: 10px;
-            text-transform: uppercase;
-        }
+        .stepper-rds { display: flex; align-items: center; margin-top: 14px; background: #080a0e; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
+        .stepper-rds button { width: 50px; height: 46px; background: #1a202c; border: none; color: #fff; font-size: 1.4rem; font-weight: 800; cursor: pointer; }
+        .stepper-rds input { flex: 1; background: transparent; border: none; text-align: center; color: #fff; font-weight: 800; font-size: 1.1rem; }
 
-        .stepper-rds {
-            display: flex;
-            align-items: center;
-            margin-top: 14px;
-            background: #080a0e;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .stepper-rds button {
-            width: 50px; height: 46px; background: #1a202c; border: none; color: #fff; font-size: 1.4rem; font-weight: 800; cursor: pointer;
-        }
-
-        .stepper-rds input {
-            flex: 1; background: transparent; border: none; text-align: center; color: #fff; font-weight: 800; font-size: 1.1rem;
-        }
-
-        /* CHECKOUT */
-        .checkout-card-rds {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-main);
-            padding: 16px;
-        }
-
-        .field-box {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
+        .field-box { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
         .field-box label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); }
+        .field-box input { background: #080a0e; border: 1px solid var(--border-color); padding: 14px; border-radius: 10px; color: #fff; font-weight: 700; font-size: 1rem; outline: none; }
 
-        .field-box input {
-            background: #080a0e;
-            border: 1px solid var(--border-color);
-            padding: 14px;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: 700;
-            font-size: 1rem;
-            outline: none;
-        }
+        .btn-comprar-green { width: 100%; background: var(--primary-green); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 1.05rem; margin-top: 14px; cursor: pointer; text-transform: uppercase; }
 
-        .btn-comprar-green {
-            width: 100%;
-            background: var(--primary-green);
-            color: #000;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 900;
-            font-size: 1.05rem;
-            margin-top: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3);
-            text-transform: uppercase;
-        }
+        .rds-footer { width: 100%; max-width: 480px; margin-top: 20px; padding: 20px 14px; background: #06080c; border-top: 1px solid var(--border-color); border-radius: var(--radius-main); text-align: center; display: flex; flex-direction: column; gap: 16px; }
+        .footer-badges { display: flex; justify-content: center; gap: 12px; }
+        .badge-sec { background: #121620; border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: var(--primary-green); }
+        .footer-links a { color: var(--primary-yellow); text-decoration: none; }
 
-        /* RODAPÉ PROFISSIONAL */
-        .rds-footer {
-            width: 100%;
-            max-width: 480px;
-            margin-top: 20px;
-            padding: 20px 14px;
-            background: #06080c;
-            border-top: 1px solid var(--border-color);
-            border-radius: var(--radius-main);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            text-align: center;
-        }
-
-        .footer-badges {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .badge-sec {
-            background: #121620;
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--primary-green);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .footer-info {
-            font-size: 0.75rem;
-            color: var(--text-sub);
-            line-height: 1.5;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .footer-links a {
-            color: var(--primary-yellow);
-            text-decoration: none;
-        }
-
-        .footer-copy {
-            font-size: 0.7rem;
-            color: #4a5568;
-            border-top: 1px solid #1a202c;
-            padding-top: 12px;
-        }
-
-        /* BOTTOM DOCK BAR */
-        .bottom-bar-rds {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 70px;
-            background: #06080c;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            z-index: 90;
-        }
-
+        .bottom-bar-rds { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: #06080c; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 90; }
         .dock-val { font-size: 1.3rem; font-weight: 900; color: var(--primary-green); }
+        .dock-btn-rds { background: var(--primary-green); color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 900; font-size: 0.9rem; cursor: pointer; }
 
-        .dock-btn-rds {
-            background: var(--primary-green);
-            color: #000;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-weight: 900;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        /* MODAIS */
-        .modal-bg {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            display: none; align-items: flex-end; justify-content: center; z-index: 300;
-        }
+        .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: flex-end; justify-content: center; z-index: 300; }
         .modal-bg.active { display: flex; }
-
-        .modal-body {
-            background: var(--bg-card);
-            width: 100%; max-width: 480px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            padding: 24px 20px; position: relative;
-            border-top: 2px solid var(--primary-yellow);
-            text-align: center;
-        }
-
-        .modal-close {
-            position: absolute; top: 16px; right: 16px;
-            background: none; border: none; color: var(--text-sub); font-size: 1.8rem; cursor: pointer;
-        }
-
-        .modal-content-text {
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            line-height: 1.6;
-            margin-top: 12px;
-            text-align: left;
-        }
-
-        .modal-content-text p { margin-bottom: 10px; }
-
-        .qr-code-img {
-            max-width: 200px;
-            width: 100%;
-            margin: 15px auto;
-            border-radius: 10px;
-            border: 4px solid #fff;
-            display: block;
-        }
+        .modal-body { background: var(--bg-card); width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 24px 20px; position: relative; border-top: 2px solid var(--primary-yellow); text-align: center; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-sub); font-size: 1.8rem; cursor: pointer; }
+        .qr-code-img { max-width: 200px; width: 100%; margin: 15px auto; border-radius: 10px; border: 4px solid #fff; display: block; }
     </style>
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
     <header class="rds-header">
         <div class="header-left">
             <div class="brand-logo">🍀 RDS PRÊMIOS</div>
@@ -705,7 +137,6 @@
         </div>
     </header>
 
-    <!-- MENU GAVETA LATERAL -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
     <nav class="drawer-menu" id="drawerMenu">
         <div class="drawer-header">
@@ -722,14 +153,13 @@
 
     <main class="main-container">
 
-        <!-- CARD PRINCIPAL COM GALERIA DE FOTOS -->
         <section class="card-rifa">
             <div class="banner-container">
                 <span class="tag-status">🔴 ADQUIRA JÁ</span>
                 
                 <div class="carousel-track" id="carouselTrack">
-                    <img src="https://i.postimg.cc/nrb5bGwc/49F67246-AA0E-4366-8940-C8ECCC7CCB19.png" alt="Hornetão Blue Foto 1" class="banner-img">
-                    <img src="https://i.postimg.cc/s2zzXY2B/0D91F578-F49B-4999-A911-E117C2295C81.png" alt="Hornetão Blue Foto 2" class="banner-img">
+                    <img src="https://i.postimg.cc/nrb5bGwc/49F67246-AA0E-4366-8940-C8ECCC7CCB19.png" alt="Hornet 1" class="banner-img">
+                    <img src="https://i.postimg.cc/s2zzXY2B/0D91F578-F49B-4999-A911-E117C2295C81.png" alt="Hornet 2" class="banner-img">
                 </div>
 
                 <button class="carousel-btn prev" id="prevSlide">❮</button>
@@ -743,7 +173,7 @@
 
             <div class="rifa-content">
                 <h1 class="rifa-title">HORNETÃO BLUE</h1>
-                <p class="rifa-subtitle">Sorteio realizado assim que todas as cotas forem vendidas! Entrega e transferência inclusas.</p>
+                <p class="rifa-subtitle">Sorteio realizado assim que todas as cotas forem vendidas!</p>
 
                 <div class="progress-box">
                     <div class="progress-header">
@@ -762,9 +192,8 @@
             </div>
         </section>
 
-        <!-- COTAS PREMIADAS -->
         <section class="cotas-premiadas-card">
-            <div class="section-title">🎁 COTAS PREMIADAS (PIX NA HORA)</div>
+            <div class="section-title">🎁 COTAS PREMIADAS</div>
             <div class="cotas-badges">
                 <div class="badge-numero">🏆 001122 - R$ 500</div>
                 <div class="badge-numero">🏆 003344 - R$ 500</div>
@@ -772,30 +201,25 @@
             </div>
         </section>
 
-        <!-- SELEÇÃO DE COTAS -->
         <section class="selecao-cotas-card">
             <div class="section-title">🍀 SELECIONE A QUANTIDADE</div>
 
             <div class="grid-rapida">
                 <button class="btn-cota-rds active" data-qtd="2">
                     <span class="qtd">+2</span>
-                    <span class="lbl">COTAS</span>
                     <span class="val">R$ 5,98</span>
                 </button>
                 <button class="btn-cota-rds" data-qtd="10">
-                    <span class="pop-tag">MAIS VENDIDO</span>
+                    <span class="pop-tag">POPULAR</span>
                     <span class="qtd">+10</span>
-                    <span class="lbl">COTAS</span>
                     <span class="val">R$ 29,90</span>
                 </button>
                 <button class="btn-cota-rds" data-qtd="50">
                     <span class="qtd">+50</span>
-                    <span class="lbl">COTAS</span>
                     <span class="val">R$ 149,50</span>
                 </button>
                 <button class="btn-cota-rds" data-qtd="100">
                     <span class="qtd">+100</span>
-                    <span class="lbl">COTAS</span>
                     <span class="val">R$ 299,00</span>
                 </button>
             </div>
@@ -807,18 +231,17 @@
             </div>
         </section>
 
-        <!-- CHECKOUT -->
         <section class="checkout-card-rds" id="checkoutSection">
             <div class="section-title">👤 DADOS DO PARTICIPANTE</div>
 
             <form id="rdsForm">
                 <div class="field-box">
-                    <label>DIGITE SEU CELULAR (WHATSAPP):</label>
+                    <label>CELULAR (WHATSAPP):</label>
                     <input type="tel" id="phoneField" placeholder="(00) 90000-0000" required maxlength="15" inputmode="numeric">
                 </div>
 
                 <div class="field-box">
-                    <label>DIGITE SEU CPF PARA PARTICIPAR:</label>
+                    <label>CPF PARA PARTICIPAR:</label>
                     <input type="text" id="cpfField" placeholder="000.000.000-00" required maxlength="14" inputmode="numeric">
                 </div>
 
@@ -826,30 +249,19 @@
             </form>
         </section>
 
-        <!-- RODAPÉ PROFISSIONAL -->
         <footer class="rds-footer">
             <div class="footer-badges">
-                <span class="badge-sec">🔒 Conexão Segura SSL</span>
+                <span class="badge-sec">🔒 Conexão Segura</span>
                 <span class="badge-sec">⚡ Pagamento Via PIX</span>
             </div>
-            
-            <p class="footer-info">
-                Proibida a venda de bilhetes para menores de 18 anos.
-            </p>
-
             <div class="footer-links">
                 <a href="#" id="footRegulamento">Regulamento</a> • 
                 <a href="#" id="footTermos">Termos de Uso</a>
-            </div>
-
-            <div class="footer-copy">
-                © 2026 RDS PRÊMIOS. Todos os direitos reservados.
             </div>
         </footer>
 
     </main>
 
-    <!-- BARRA FIXA INFERIOR -->
     <div class="bottom-bar-rds">
         <div>
             <span style="font-size:0.7rem; color:var(--text-sub);">TOTAL:</span><br>
@@ -858,12 +270,11 @@
         <button class="dock-btn-rds" id="btnDockPagar">PARTICIPAR 🍀</button>
     </div>
 
-    <!-- MODAL PIX (COM QR CODE E COPIA E COLA) -->
     <div class="modal-bg" id="modalPix">
         <div class="modal-body">
             <button class="modal-close" id="closePix">✕</button>
             <h3 style="color:var(--primary-yellow); font-weight:900;">PAGAMENTO PIX ⚡</h3>
-            <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 10px 0;">Escaneie o QR Code ou copie o código Pix Copia e Cola:</p>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 10px 0;">Escaneie o QR Code ou copie a chave Pix:</p>
             
             <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code PIX">
 
@@ -873,7 +284,6 @@
         </div>
     </div>
 
-    <!-- MODAL CONSULTA NÚMEROS -->
     <div class="modal-bg" id="modalConsulta">
         <div class="modal-body">
             <button class="modal-close" id="closeConsulta">✕</button>
@@ -886,34 +296,22 @@
         </div>
     </div>
 
-    <!-- MODAL REGULAMENTO -->
     <div class="modal-bg" id="modalRegulamento">
         <div class="modal-body">
             <button class="modal-close" id="closeRegulamento">✕</button>
             <h3 style="color:var(--primary-yellow); font-weight:900;">REGULAMENTO</h3>
-            <div class="modal-content-text">
-                <p>1. O sorteio só acontecerá quando 100% de todas as cotas forem devidamente vendidas e pagas.</p>
-                <p>2. A data oficial do sorteio será informada com antecedência em nossas redes sociais assim que a meta de vendas for atingida.</p>
-                <p>3. A entrega do veículo e a transferência de documentação para o nome do ganhador ficam totalmente por conta da <strong>RDS PRÊMIOS</strong>, sem nenhum custo adicional de frete ou transferência para o contemplado.</p>
-                <p>4. As reservas de cotas pendentes de pagamento via PIX expiram automaticamente em 15 minutos, sendo disponibilizadas novamente para o sistema.</p>
-            </div>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin-top:12px; text-align:left;">Sorteio realizado após 100% das cotas vendidas.</p>
         </div>
     </div>
 
-    <!-- MODAL TERMOS DE USO -->
     <div class="modal-bg" id="modalTermos">
         <div class="modal-body">
             <button class="modal-close" id="closeTermos">✕</button>
             <h3 style="color:var(--primary-yellow); font-weight:900;">TERMOS DE USO</h3>
-            <div class="modal-content-text">
-                <p>1. A participação na rifa é estritamente proibida para menores de 18 anos.</p>
-                <p>2. O participante declara que todas as informações prestadas no momento da compra (CPF e Contato) são verdadeiras e de sua autoria.</p>
-                <p>3. O prêmio será entregue devidamente transferido ao ganhador em até 5 dias úteis após a validação oficial do resultado e verificação do participante contemplado.</p>
-            </div>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin-top:12px; text-align:left;">Proibida participação de menores de 18 anos.</p>
         </div>
     </div>
 
-    <!-- TELA DE MEUS BILHETES (Full Screen) -->
     <section id="pagina-meus-bilhetes" class="container-bilhetes hidden">
       <div class="header-bilhetes">
         <button id="btn-voltar-bilhetes" onclick="fecharPaginaBilhetes()">← Voltar ao Início</button>
@@ -952,7 +350,6 @@
         document.getElementById('btnMore').onclick = () => { buttons.forEach(x => x.classList.remove('active')); update(qtd + 1); };
         qtdInput.oninput = (e) => { buttons.forEach(x => x.classList.remove('active')); update(e.target.value); };
 
-        /* CARROSSEL */
         let currentSlide = 0;
         const track = document.getElementById('carouselTrack');
         const dots = document.querySelectorAll('.dot');
@@ -969,52 +366,32 @@
         document.getElementById('prevSlide').onclick = () => goToSlide(currentSlide === 1 ? 0 : 1);
         dots.forEach((dot, idx) => dot.onclick = () => goToSlide(idx));
 
-        /* GAVETA LATERAL */
         const drawerMenu = document.getElementById('drawerMenu');
         const drawerOverlay = document.getElementById('drawerOverlay');
 
-        function openDrawer() {
-            drawerMenu.classList.add('active');
-            drawerOverlay.classList.add('active');
-        }
-
-        function closeDrawer() {
-            drawerMenu.classList.remove('active');
-            drawerOverlay.classList.remove('active');
-        }
+        function openDrawer() { drawerMenu.classList.add('active'); drawerOverlay.classList.add('active'); }
+        function closeDrawer() { drawerMenu.classList.remove('active'); drawerOverlay.classList.remove('active'); }
 
         document.getElementById('openDrawer').onclick = openDrawer;
         document.getElementById('closeDrawer').onclick = closeDrawer;
         drawerOverlay.onclick = closeDrawer;
 
-        /* MODAIS */
         const modalConsulta = document.getElementById('modalConsulta');
         const modalRegulamento = document.getElementById('modalRegulamento');
         const modalTermos = document.getElementById('modalTermos');
         const modalPix = document.getElementById('modalPix');
 
-        function openModal(modal) {
-            closeDrawer();
-            modal.classList.add('active');
-        }
+        function openModal(modal) { closeDrawer(); modal.classList.add('active'); }
 
         document.getElementById('btnMeusNumeros').onclick = () => {
             const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
-            if (cpfSalvo) {
-                exibirMeusBilhetesPorCpf(cpfSalvo);
-            } else {
-                openModal(modalConsulta);
-            }
+            if (cpfSalvo) { exibirMeusBilhetesPorCpf(cpfSalvo); } else { openModal(modalConsulta); }
         };
 
         document.getElementById('navMeusBilhetes').onclick = (e) => { 
             e.preventDefault(); 
             const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
-            if (cpfSalvo) {
-                exibirMeusBilhetesPorCpf(cpfSalvo);
-            } else {
-                openModal(modalConsulta);
-            }
+            if (cpfSalvo) { exibirMeusBilhetesPorCpf(cpfSalvo); } else { openModal(modalConsulta); }
         };
 
         document.getElementById('closeConsulta').onclick = () => modalConsulta.classList.remove('active');
@@ -1027,10 +404,7 @@
         document.getElementById('closeTermos').onclick = () => modalTermos.classList.remove('active');
 
         document.getElementById('navInicio').onclick = (e) => {
-            e.preventDefault();
-            closeDrawer();
-            fecharPaginaBilhetes();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            e.preventDefault(); closeDrawer(); fecharPaginaBilhetes(); window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         document.getElementById('closePix').onclick = () => modalPix.classList.remove('active');
@@ -1044,16 +418,13 @@
         document.getElementById('btnVerMeusBilhetesModal').onclick = () => {
             modalPix.classList.remove('active');
             const cpfSalvo = localStorage.getItem('ultimoCpfConsultado');
-            if (cpfSalvo) {
-                exibirMeusBilhetesPorCpf(cpfSalvo);
-            }
+            if (cpfSalvo) { exibirMeusBilhetesPorCpf(cpfSalvo); }
         };
 
         document.getElementById('btnDockPagar').onclick = () => {
             document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
         };
 
-        /* MÁSCARAS AUTOMÁTICAS */
         document.getElementById('phoneField').addEventListener('input', function(e) {
             let v = e.target.value.replace(/\D/g, "");
             v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
@@ -1073,7 +444,6 @@
         applyCpfMask(document.getElementById('cpfField'));
         applyCpfMask(document.getElementById('cpfSearch'));
 
-        /* NAVEGAÇÃO / TELA DE BILHETES */
         function fecharPaginaBilhetes() {
             document.getElementById('pagina-meus-bilhetes').classList.add('hidden');
         }
@@ -1084,43 +454,60 @@
             const listaContainer = document.getElementById('lista-compras-container');
 
             const cpfApenasNumeros = String(cpfOriginal).replace(/\D/g, '');
+            const cpfFormatado = cpfApenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
             infoCpf.innerHTML = 'Buscando bilhetes...';
             listaContainer.innerHTML = '';
             containerBilhetes.classList.remove('hidden');
 
             try {
-                const response = await fetch('/api/meus-bilhetes', {
+                // Tenta chamar a API do backend
+                let response = await fetch('/api/meus-bilhetes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cpf: cpfApenasNumeros })
+                    body: JSON.stringify({ cpf: cpfApenasNumeros, documento: cpfApenasNumeros })
                 });
 
-                const data = await response.json();
-                const cpfFormatado = cpfApenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                if (!response.ok && response.status !== 404) {
+                    response = await fetch(`/api/meus-bilhetes?cpf=${cpfApenasNumeros}`);
+                }
+
+                const textoResposta = await response.text();
+                let data = {};
+                try {
+                    data = JSON.parse(textoResposta);
+                } catch(e) {
+                    alert('Resposta do Servidor (Não é JSON):\n' + textoResposta);
+                }
+
                 infoCpf.innerHTML = `Exibindo bilhetes para o CPF: <strong>${cpfFormatado}</strong>`;
 
-                const listaCompras = Array.isArray(data) ? data : (data.compras || data.bilhetes || data.dados || []);
+                let listaCompras = [];
+                if (Array.isArray(data)) {
+                    listaCompras = data;
+                } else if (data && typeof data === 'object') {
+                    listaCompras = data.compras || data.bilhetes || data.dados || data.pedidos || data.tickets || data.cotas || [];
+                }
 
-                if ((data.sucesso !== false && response.ok) && listaCompras.length > 0) {
+                if (listaCompras.length > 0) {
                     let htmlCards = '';
                     listaCompras.forEach((compra, i) => {
-                        const statusNormalizado = (compra.status || 'pago').toLowerCase();
-                        const isPago = ['pago', 'approved', 'paid', 'concluido'].includes(statusNormalizado);
+                        const statusNormalizado = String(compra.status || 'pago').toLowerCase();
+                        const isPago = ['pago', 'approved', 'paid', 'concluido', 'aprovado'].includes(statusNormalizado);
                         const statusClass = isPago ? 'pago' : 'pendente';
                         const statusTexto = isPago ? 'Pago' : 'Pendente';
                         
-                        let cotas = compra.numeros || compra.cotas || compra.bilhetes || [];
+                        let cotas = compra.numeros || compra.cotas || compra.bilhetes || compra.numbers || [];
                         if (!Array.isArray(cotas)) {
-                            cotas = [cotas];
+                            cotas = typeof cotas === 'string' ? cotas.split(',') : [cotas];
                         }
                         
-                        let cotasHtml = cotas.map(c => `<span class="cota-tag">${c}</span>`).join('');
+                        let cotasHtml = cotas.map(c => `<span class="cota-tag">${String(c).trim()}</span>`).join('');
 
                         htmlCards += `
                             <div class="card-compra">
                                 <div class="card-compra-header">
-                                    <span>Compra #${compra.id || (i + 1)}</span>
+                                    <span>Compra #${compra.id || compra.codigo || (i + 1)}</span>
                                     <span class="badge-status ${statusClass}">${statusTexto}</span>
                                 </div>
                                 <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">Quantidade: ${compra.qtd || cotas.length} cotas</p>
@@ -1132,15 +519,15 @@
                     });
                     listaContainer.innerHTML = htmlCards;
                 } else {
+                    alert('Servidor respondeu, mas não encontrou bilhetes para o CPF. Retorno do Servidor: ' + JSON.stringify(data));
                     listaContainer.innerHTML = '<div class="card-compra"><p>Nenhum bilhete encontrado para este CPF.</p></div>';
                 }
             } catch (err) {
-                console.error(err);
-                listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro ao carregar bilhetes. Tente novamente.</p></div>';
+                alert('Erro na requisição ao servidor:\n' + err.message);
+                listaContainer.innerHTML = '<div class="card-compra"><p style="color:#ef4444;">Erro ao carregar bilhetes.</p></div>';
             }
         }
 
-        /* BUSCA POR CPF VIA MODAL */
         const btnBuscar = document.getElementById('btnBuscarBilhetes');
         const cpfSearchInput = document.getElementById('cpfSearch');
 
@@ -1157,7 +544,6 @@
             exibirMeusBilhetesPorCpf(cpf);
         };
 
-        /* PROCESSA A COMPRA E GERA PIX VIA /api/pix */
         document.getElementById('rdsForm').onsubmit = async (e) => {
             e.preventDefault();
             
@@ -1166,15 +552,8 @@
             const totalValor = parseFloat((qtd * PRECO).toFixed(2));
             const btnSubmit = document.querySelector('.btn-comprar-green');
             
-            if (telefone.length < 10) {
-                alert('Por favor, informe um número de celular válido com DDD.');
-                return;
-            }
-
-            if (cpf.length !== 11) {
-                alert('Por favor, informe um CPF válido.');
-                return;
-            }
+            if (telefone.length < 10) { alert('Por favor, informe um número de celular válido com DDD.'); return; }
+            if (cpf.length !== 11) { alert('Por favor, informe um CPF válido.'); return; }
 
             btnSubmit.innerText = 'GERANDO PIX...';
             btnSubmit.disabled = true;
@@ -1186,26 +565,28 @@
                     body: JSON.stringify({ 
                         telefone: telefone, 
                         whatsapp: telefone, 
+                        phone: telefone,
                         cpf: cpf, 
                         valor: totalValor, 
                         valorTotal: totalValor,
-                        qtd: qtd 
+                        amount: totalValor,
+                        qtd: qtd
                     })
                 });
 
                 const data = await response.json();
 
-                if (response.ok && (data.sucesso || data.qr_code || data.pix_copia_cola)) {
-                    const pixCopiaECola = data.qr_code || data.pix_copia_cola || data.qrcode;
-                    const qrCodeImg = data.qr_code_base64 || data.qr_code_url || data.image_url;
+                if (response.ok && (data.sucesso || data.qr_code || data.pix_copia_cola || data.pix)) {
+                    const pixCopiaECola = data.qr_code || data.pix_copia_cola || data.qrcode || data.pix;
+                    const qrCodeImg = data.qr_code_base64 || data.qr_code_url || data.image_url || data.qr_code;
 
                     localStorage.setItem('ultimoCpfConsultado', cpf);
 
-                    if (pixCopiaECola) {
+                    if (pixCopiaECola && typeof pixCopiaECola === 'string') {
                         document.getElementById('pixCode').value = pixCopiaECola;
                         
                         const qrImgElem = document.getElementById('qrCodeImg');
-                        if (qrCodeImg) {
+                        if (qrCodeImg && typeof qrCodeImg === 'string') {
                             qrImgElem.src = qrCodeImg.startsWith('data:') || qrCodeImg.startsWith('http') ? qrCodeImg : `data:image/png;base64,${qrCodeImg}`;
                             qrImgElem.style.display = 'block';
                         } else {
@@ -1213,15 +594,14 @@
                         }
                         modalPix.classList.add('active');
                     } else {
-                        alert('Pix gerado com sucesso! Seus bilhetes já foram salvos.');
+                        alert('Pix gerado com sucesso! Seus bilhetes foram cadastrados.');
                         exibirMeusBilhetesPorCpf(cpf);
                     }
                 } else {
-                    alert('Erro ao gerar Pix: ' + (data.message || data.erro || 'Verifique os dados informados.'));
+                    alert('Erro ao gerar Pix: ' + (data.message || data.erro || JSON.stringify(data)));
                 }
             } catch (error) {
-                alert('Erro de conexão com o servidor de pagamento.');
-                console.error(error);
+                alert('Erro de conexão ao gerar Pix: ' + error.message);
             } finally {
                 btnSubmit.innerText = 'PAGAR COM PIX AGORA 🍀';
                 btnSubmit.disabled = false;
