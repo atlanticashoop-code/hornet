@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
 
     const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
-    const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf},cpf.ilike.%25${cleanCpf}%25)&order=created_at.desc&select=*`;
+    const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf})&order=id.desc&select=*`;
 
     const fetchResponse = await fetch(queryUrl, {
       method: 'GET',
@@ -49,23 +49,24 @@ module.exports = async (req, res) => {
     }
 
     const comprasTratadas = compras.map(item => {
-      let numerosTratados = item.numeros || item.cotas || [];
+      let cotasArray = [];
+      const numRaw = item.numeros || item.cotas || item.bilhetes || '';
 
-      if (typeof numerosTratados === 'string') {
+      if (Array.isArray(numRaw)) {
+        cotasArray = numRaw;
+      } else if (typeof numRaw === 'string') {
         try {
-          const parsed = JSON.parse(numerosTratados);
-          numerosTratados = Array.isArray(parsed) ? parsed : numerosTratados.split(',');
+          const parsed = JSON.parse(numRaw);
+          cotasArray = Array.isArray(parsed) ? parsed : numRaw.split(',');
         } catch (e) {
-          numerosTratados = numerosTratados.split(',');
+          cotasArray = numRaw.split(',');
         }
       }
 
       return {
         ...item,
         status: 'pago',
-        numeros: Array.isArray(numerosTratados) 
-          ? numerosTratados.map(n => String(n).trim()).filter(n => n !== '') 
-          : []
+        numeros: cotasArray.map(n => String(n).trim()).filter(n => n !== '')
       };
     });
 
