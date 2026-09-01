@@ -17,12 +17,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ message: 'Informe um CPF válido com 11 dígitos.' });
     }
 
-    // =========================================================
-    // COLE ABAIXO SEU ACCESS TOKEN DE PRODUÇÃO DO MERCADO PAGO
-    // Exemplo: 'APP_USR-1234567890123456-083112-...'
-    // =========================================================
     const MP_ACCESS_TOKEN = 'APP_USR-8568413033783803-082914-edc65dc648a813113da7590030ded6f7-3651775878';
-
     const SUPABASE_REST_URL = 'https://hsfkkihveyxhfsdzuvuf.supabase.co/rest/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZmtraWh2ZXl4aGZzZHp1dnVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMzgzMTMsImV4cCI6MjEwMzYxNDMxM30.x57rHz2zt-FuIMNOlQqe4UC7jXHkp-LjR__Xze5CJi4';
 
@@ -36,14 +31,15 @@ module.exports = async (req, res) => {
       }
     }
 
-    // 2. Tenta registrar a intenção no Supabase (não trava o Pix se houver erro)
+    // 2. Grava no Supabase
     try {
-      await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
+      const supaRes = await fetch(`${SUPABASE_REST_URL}/bilhetes`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY,
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
         },
         body: JSON.stringify({
           cpf: cleanCpf,
@@ -54,8 +50,13 @@ module.exports = async (req, res) => {
           status: 'pendente'
         })
       });
+
+      if (!supaRes.ok) {
+        const supaErrorText = await supaRes.text();
+        console.error('Erro na gravação do Supabase:', supaErrorText);
+      }
     } catch (e) {
-      console.error('Aviso: Erro ao registrar no Supabase antes do Pix:', e);
+      console.error('Falha de conexão com Supabase:', e);
     }
 
     // 3. Monta a requisição para o Mercado Pago
@@ -93,7 +94,6 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Extrai o código Pix Copia e Cola
     const qrCode = mpData.point_of_interaction?.transaction_data?.qr_code;
     const qrCodeBase64 = mpData.point_of_interaction?.transaction_data?.qr_code_base64;
 
