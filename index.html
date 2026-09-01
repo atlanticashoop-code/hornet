@@ -132,7 +132,7 @@
             <div class="brand-logo">🍀 RDS PRÊMIOS</div>
         </div>
         <div class="header-right">
-            <button class="btn-meus-numeros" id="btnMeusNumeros">🔍 BILHETES</button>
+            <button class="btn-meus-numeros" id="btnMeusNumeros">🎫 MEUS BILHETES</button>
             <button class="menu-btn-hamburger" id="openDrawer">☰</button>
         </div>
     </header>
@@ -236,6 +236,11 @@
 
             <form id="rdsForm">
                 <div class="field-box">
+                    <label>E-MAIL:</label>
+                    <input type="email" id="emailField" placeholder="seuemail@exemplo.com" required>
+                </div>
+
+                <div class="field-box">
                     <label>CELULAR (WHATSAPP):</label>
                     <input type="tel" id="phoneField" placeholder="(00) 90000-0000" required maxlength="15" inputmode="numeric">
                 </div>
@@ -292,7 +297,7 @@
                 <label>DIGITE SEU CPF:</label>
                 <input type="text" id="cpfSearch" placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
             </div>
-            <button class="btn-comprar-green" id="btnBuscarBilhetes" style="margin-top:12px;">BUSCAR BILHETES</button>
+            <button class="btn-comprar-green" id="btnBuscarBilhetes" style="margin-top:12px;">VER MEUS NÚMEROS</button>
         </div>
     </div>
 
@@ -476,10 +481,8 @@
                 if (listaCompras.length > 0) {
                     let htmlCards = '';
                     listaCompras.forEach((compra, i) => {
-                        const statusNormalizado = String(compra.status || 'pago').toLowerCase();
-                        const isPago = ['pago', 'approved', 'paid', 'concluido', 'aprovado'].includes(statusNormalizado);
-                        const statusClass = isPago ? 'pago' : 'pendente';
-                        const statusTexto = isPago ? 'Pago' : 'Pendente';
+                        const statusClass = 'pago';
+                        const statusTexto = 'Pago';
                         
                         let cotas = compra.numeros || compra.cotas || compra.bilhetes || compra.numbers || [];
                         
@@ -541,11 +544,13 @@
         document.getElementById('rdsForm').onsubmit = async (e) => {
             e.preventDefault();
             
+            const email = document.getElementById('emailField').value.trim();
             const telefone = document.getElementById('phoneField').value.replace(/\D/g, '');
             const cpf = document.getElementById('cpfField').value.replace(/\D/g, '');
             const totalValor = parseFloat((qtd * PRECO).toFixed(2));
             const btnSubmit = document.querySelector('.btn-comprar-green');
             
+            if (!email || !email.includes('@')) { alert('Por favor, informe um e-mail válido.'); return; }
             if (telefone.length < 10) { alert('Por favor, informe um número de celular válido com DDD.'); return; }
             if (cpf.length !== 11) { alert('Por favor, informe um CPF válido.'); return; }
 
@@ -557,6 +562,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
+                        email: email,
                         telefone: telefone, 
                         whatsapp: telefone, 
                         phone: telefone,
