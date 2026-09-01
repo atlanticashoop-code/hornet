@@ -19,7 +19,6 @@ module.exports = async (req, res) => {
 
     const formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 
-    // Consulta buscando no Supabase por qualquer variação do CPF na coluna 'cpf'
     const queryUrl = `${SUPABASE_REST_URL}/bilhetes?or=(cpf.eq.${cleanCpf},cpf.eq.${formattedCpf},cpf.ilike.%${cleanCpf}%)&order=created_at.desc&select=*`;
 
     const fetchResponse = await fetch(queryUrl, {
@@ -34,8 +33,7 @@ module.exports = async (req, res) => {
     const responseText = await fetchResponse.text();
 
     if (!fetchResponse.ok) {
-      console.error('Erro de permissão/resposta do Supabase:', responseText);
-      return res.status(500).json({ sucesso: false, message: 'Erro ao consultar banco de dados.', detalhe: responseText });
+      return res.status(500).json([]);
     }
 
     let compras = [];
@@ -45,14 +43,10 @@ module.exports = async (req, res) => {
       compras = [];
     }
 
-    return res.status(200).json({
-      sucesso: true,
-      total_encontrado: compras.length,
-      compras: Array.isArray(compras) ? compras : []
-    });
+    // Retorna a lista diretamente
+    return res.status(200).json(Array.isArray(compras) ? compras : []);
 
   } catch (err) {
-    console.error('Erro interno:', err);
-    return res.status(500).json({ sucesso: false, message: 'Erro interno no servidor.' });
+    return res.status(500).json([]);
   }
 };
